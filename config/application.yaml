@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+app:
+  rate-booking-duration: 120
+  default-base-currency: GBP
+  default-additional-pip: 1
+  forex-rate-api-url: <placeholder>
+
+db:
+  url: <placeholder>
+  user: <placeholder>
+  password: <placeholder>

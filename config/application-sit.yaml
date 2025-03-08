@@ -1,0 +1,6 @@
+app:
+  forex-rate-api-url: http://forex.sit.example.com:9090
+
+db:
+  url: jdbc:mysql://db.sit.example.come:3306/forex
+  user: appuser

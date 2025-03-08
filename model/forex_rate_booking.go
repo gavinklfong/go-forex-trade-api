@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const TIMESTAMP_FORMAT = "2006-01-02T15:04:05"
+
 type ForexRateBookingRequest struct {
 	BaseCurrency       string
 	CounterCurrency    string
@@ -13,16 +15,16 @@ type ForexRateBookingRequest struct {
 	CustomerId         int32
 }
 
-type ForexRateBookingResponse struct {
-	*ForexRateBookingRequest
+type ForexRateBooking struct {
+	ForexRateBookingRequest
 	Timestamp  time.Time
 	Rate       float32
 	BookingRef string
 	ExpiryTime time.Time
 }
 
-func (f *ForexRateBookingResponse) UnmarshalJSON(data []byte) error {
-	type Alias ForexRateBookingResponse
+func (f *ForexRateBooking) UnmarshalJSON(data []byte) error {
+	type Alias ForexRateBooking
 	aux := &struct {
 		Timestamp  string
 		ExpiryTime string
@@ -37,12 +39,12 @@ func (f *ForexRateBookingResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	f.Timestamp, err = time.Parse("2006-01-02T15:04:05", aux.Timestamp)
+	f.Timestamp, err = time.Parse(TIMESTAMP_FORMAT, aux.Timestamp)
 	if err != nil {
 		return err
 	}
 
-	f.ExpiryTime, err = time.Parse("2006-01-02T15:04:05", aux.ExpiryTime)
+	f.ExpiryTime, err = time.Parse(TIMESTAMP_FORMAT, aux.ExpiryTime)
 	if err != nil {
 		return err
 	}
@@ -50,15 +52,15 @@ func (f *ForexRateBookingResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (f *ForexRateBookingResponse) MarshalJSON() ([]byte, error) {
-	type Alias ForexRateBookingResponse
+func (f *ForexRateBooking) MarshalJSON() ([]byte, error) {
+	type Alias ForexRateBooking
 	return json.Marshal(&struct {
 		Timestamp  string `json:"timestamp"`
 		ExpiryTime string `json:"expiryTime"`
 		*Alias
 	}{
-		Timestamp:  f.Timestamp.Format("2006-01-02T15:04:05"),
-		ExpiryTime: f.ExpiryTime.Format("2006-01-02T15:04:05"),
+		Timestamp:  f.Timestamp.Format(TIMESTAMP_FORMAT),
+		ExpiryTime: f.ExpiryTime.Format(TIMESTAMP_FORMAT),
 		Alias:      (*Alias)(f),
 	})
 }

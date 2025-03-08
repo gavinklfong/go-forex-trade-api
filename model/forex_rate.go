@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type ForexRateResponse struct {
+type ForexRate struct {
 	Timestamp       time.Time
 	BaseCurrency    string
 	CounterCurrency string
@@ -14,8 +14,8 @@ type ForexRateResponse struct {
 	Spread          float32
 }
 
-func (f *ForexRateResponse) UnmarshalJSON(data []byte) error {
-	type Alias ForexRateResponse
+func (f *ForexRate) UnmarshalJSON(data []byte) error {
+	type Alias ForexRate
 	aux := &struct {
 		Timestamp string
 		*Alias
@@ -37,8 +37,8 @@ func (f *ForexRateResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (f *ForexRateResponse) MarshalJSON() ([]byte, error) {
-	type Alias ForexRateResponse
+func (f *ForexRate) MarshalJSON() ([]byte, error) {
+	type Alias ForexRate
 	return json.Marshal(&struct {
 		Timestamp string `json:"timestamp"`
 		*Alias

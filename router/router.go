@@ -1,31 +1,37 @@
 package router
 
 import (
-	"fmt"
-	"net/http"
-
-	"github.com/gavinklfong/go-rest-api-demo/model"
+	"github.com/gavinklfong/go-rest-api-demo/endpoint"
 	"github.com/gin-gonic/gin"
 )
 
-var engine *gin.Engine
+type Router struct {
+	e                *gin.Engine
+	getRateEndpoint  *endpoint.GetRateEndpoint
+	bookRateEndpoint *endpoint.BookRateEndpoint
+}
 
-func SetupRouter() *gin.Engine {
-	r := gin.Default()
-	doSetup(r)
+func NewRouter(getRateEndpoint *endpoint.GetRateEndpoint,
+	bookRateEndpoint *endpoint.BookRateEndpoint) *Router {
+	r := &Router{e: gin.Default(),
+		getRateEndpoint:  getRateEndpoint,
+		bookRateEndpoint: bookRateEndpoint}
+	r.doSetup()
 	return r
 }
 
-func doSetup(engine *gin.Engine) {
-	engine.POST("/rates/book", func(c *gin.Context) {
-		var request model.ForexRateBookingRequest
-		if err := c.ShouldBindJSON(&request); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+func (r *Router) doSetup() {
 
-		fmt.Printf("booking request: %+v\n", request)
+	r.e.GET("/rates/:baseCurrency}/:counterCurrency", r.getRateEndpoint.GetRateByCurrencyPair)
+	r.e.GET("/rates/:baseCurrency", r.getRateEndpoint.GetRateByBaseCurrency)
+	r.e.GET("/rates/latest", r.getRateEndpoint.GetAllRates)
 
-		c.JSON(http.StatusOK, gin.H{"status": "OK"})
-	})
+	r.e.POST("/rates/book", r.bookRateEndpoint.BookRate)
+
+	r.e.GET("/deals", endpoint.GetForexDeal)
+	r.e.POST("/deals", endpoint.SubmitForexDeal)
+}
+
+func (r *Router) Run(s string) {
+	r.e.Run(s)
 }

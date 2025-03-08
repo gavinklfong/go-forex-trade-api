@@ -1,0 +1,7 @@
+app:
+  forex-rate-api-url: http://localhost:9090
+
+db:
+  url: jdbc:mysql://localhost:3306/forex
+  user: appuser
+  password: passme
