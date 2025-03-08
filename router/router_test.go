@@ -1,4 +1,4 @@
-package main
+package router
 
 import (
 	"encoding/json"
@@ -26,7 +26,7 @@ func TestRouter(t *testing.T) {
 	requestJson, _ := json.Marshal(request)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/rates/book", strings.NewReader(string(requestJson)))
-	r.Engine.ServeHTTP(w, req)
+	r.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 	fmt.Printf("response body: %+v/n", w.Body.String())

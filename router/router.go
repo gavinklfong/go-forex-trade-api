@@ -1,4 +1,4 @@
-package main
+package router
 
 import (
 	"fmt"
@@ -8,18 +8,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Router struct {
-	Engine *gin.Engine
-}
+var engine *gin.Engine
 
-func SetupRouter() *Router {
-	r := &Router{Engine: gin.Default()}
-	r.doSetup()
+func SetupRouter() *gin.Engine {
+	r := gin.Default()
+	doSetup(r)
 	return r
 }
 
-func (r *Router) doSetup() {
-	r.Engine.POST("/rates/book", func(c *gin.Context) {
+func doSetup(engine *gin.Engine) {
+	engine.POST("/rates/book", func(c *gin.Context) {
 		var request model.ForexRateBookingRequest
 		if err := c.ShouldBindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
