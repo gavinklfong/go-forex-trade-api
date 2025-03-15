@@ -8,20 +8,19 @@ import (
 	"net/http"
 
 	"github.com/gavinklfong/go-rest-api-demo/apiclient/model"
-	"github.com/gavinklfong/go-rest-api-demo/config"
 )
 
 type ForexApiClient struct {
 	url string
 }
 
-// func NewForexApiClient(url string) *ForexApiClient {
-// 	return &ForexApiClient{url: url}
-// }
-
-func NewForexApiClient() *ForexApiClient {
-	return &ForexApiClient{url: config.AppConfig.ForexRateApiUrl}
+func NewForexApiClient(url string) *ForexApiClient {
+	return &ForexApiClient{url: url}
 }
+
+// func NewForexApiClient() *ForexApiClient {
+// 	return &ForexApiClient{url: config.AppConfig.ForexRateApiUrl}
+// }
 
 func (c *ForexApiClient) GetLatestRates() ([]model.ForexRateResponse, error) {
 	requestURL := fmt.Sprintf("%s/rates/latest", c.url)

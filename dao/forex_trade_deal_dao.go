@@ -21,7 +21,7 @@ func (dao *ForexTradeDealDao) Insert(deal *model.ForexTradeDeal) (int64, error) 
 	trade_action, base_currency_amount, customer_id) VALUES "
 	(?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		deal.ID, deal.Ref, deal.Timestamp, deal.BaseCurrency, deal.CounterCurrency, deal.Rate,
-		deal.TradeAction, deal.BaseCurrencyAmount, deal.CustomerId)
+		deal.TradeAction, deal.BaseCurrencyAmount, deal.CustomerID)
 	if err != nil {
 		slog.Error("insert deal: %v", err)
 		return 0, err
@@ -42,7 +42,7 @@ func (dao *ForexTradeDealDao) FindByID(id string) (*model.ForexTradeDeal, error)
 	trade_action, base_currency_amount, customer_id
 	FROM forex_trade_deal WHERE id=?`, id).Scan(&deal.ID, &deal.Ref, &deal.Timestamp,
 		&deal.BaseCurrency, &deal.CounterCurrency, &deal.Rate, &deal.TradeAction,
-		&deal.BaseCurrencyAmount, &deal.CustomerId)
+		&deal.BaseCurrencyAmount, &deal.CustomerID)
 	switch {
 	case err == sql.ErrNoRows:
 		slog.Info("no deal record with id %v", id)

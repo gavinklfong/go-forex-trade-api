@@ -18,6 +18,7 @@ require (
 	github.com/wiremock/go-wiremock v1.11.0
 	github.com/wiremock/wiremock-testcontainers-go v1.0.0-alpha-9
 	github.com/xyproto/randomstring v1.2.0
+	go.uber.org/dig v1.18.1
 )
 
 require (
