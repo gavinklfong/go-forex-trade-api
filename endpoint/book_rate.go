@@ -9,10 +9,10 @@ import (
 )
 
 type BookRateEndpoint struct {
-	r *service.RateService
+	r *service.ForexRateService
 }
 
-func NewBookRateEndpoint(rateService *service.RateService) *BookRateEndpoint {
+func NewBookRateEndpoint(rateService *service.ForexRateService) *BookRateEndpoint {
 	return &BookRateEndpoint{r: rateService}
 }
 

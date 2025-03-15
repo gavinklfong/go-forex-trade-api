@@ -6,16 +6,19 @@ import (
 )
 
 type Router struct {
-	e                *gin.Engine
-	getRateEndpoint  *endpoint.GetRateEndpoint
-	bookRateEndpoint *endpoint.BookRateEndpoint
+	e                 *gin.Engine
+	getRateEndpoint   *endpoint.GetRateEndpoint
+	bookRateEndpoint  *endpoint.BookRateEndpoint
+	tradeDealEndpoint *endpoint.TradeDealEndpoint
 }
 
 func NewRouter(getRateEndpoint *endpoint.GetRateEndpoint,
-	bookRateEndpoint *endpoint.BookRateEndpoint) *Router {
+	bookRateEndpoint *endpoint.BookRateEndpoint,
+	tradeDealEndpoint *endpoint.TradeDealEndpoint) *Router {
 	r := &Router{e: gin.Default(),
-		getRateEndpoint:  getRateEndpoint,
-		bookRateEndpoint: bookRateEndpoint}
+		getRateEndpoint:   getRateEndpoint,
+		bookRateEndpoint:  bookRateEndpoint,
+		tradeDealEndpoint: tradeDealEndpoint}
 	r.doSetup()
 	return r
 }
@@ -28,8 +31,8 @@ func (r *Router) doSetup() {
 
 	r.e.POST("/rates/book", r.bookRateEndpoint.BookRate)
 
-	r.e.GET("/deals", endpoint.GetForexDeal)
-	r.e.POST("/deals", endpoint.SubmitForexDeal)
+	r.e.GET("/deals", r.tradeDealEndpoint.GetTradeDeal)
+	r.e.POST("/deals", r.tradeDealEndpoint.SubmitTradeDeal)
 }
 
 func (r *Router) Run(s string) {

@@ -7,6 +7,9 @@
 package main
 
 import (
+	"github.com/gavinklfong/go-rest-api-demo/apiclient"
+	"github.com/gavinklfong/go-rest-api-demo/config"
+	"github.com/gavinklfong/go-rest-api-demo/dao"
 	"github.com/gavinklfong/go-rest-api-demo/endpoint"
 	"github.com/gavinklfong/go-rest-api-demo/router"
 	"github.com/gavinklfong/go-rest-api-demo/service"
@@ -15,9 +18,16 @@ import (
 // Injectors from wire.go:
 
 func InitializeRouter() *router.Router {
-	rateService := service.NewRateService()
-	getRateEndpoint := endpoint.NewGetRateEndpoint(rateService)
-	bookRateEndpoint := endpoint.NewBookRateEndpoint(rateService)
-	routerRouter := router.NewRouter(getRateEndpoint, bookRateEndpoint)
+	db := config.InitializeDBConnection()
+	customerDao := dao.NewCustomerDao(db)
+	forexRateDao := dao.NewForexRateDao(db)
+	forexApiClient := apiclient.NewForexApiClient()
+	forexRateService := service.NewForexRateService(customerDao, forexRateDao, forexApiClient)
+	getRateEndpoint := endpoint.NewGetRateEndpoint(forexRateService)
+	bookRateEndpoint := endpoint.NewBookRateEndpoint(forexRateService)
+	forexTradeDealDao := dao.NewForexTradeDealDao(db)
+	forexTradeDealService := service.NewForexTradeDealService(forexTradeDealDao, forexRateService)
+	tradeDealEndpoint := endpoint.NewTradeDealEndpoint(forexTradeDealService)
+	routerRouter := router.NewRouter(getRateEndpoint, bookRateEndpoint, tradeDealEndpoint)
 	return routerRouter
 }

@@ -19,11 +19,11 @@ type GetRateByCurrencyPairRequest struct {
 }
 
 type GetRateEndpoint struct {
-	r *service.RateService
+	r *service.ForexRateService
 }
 
-func NewGetRateEndpoint(rateService *service.RateService) *GetRateEndpoint {
-	return &GetRateEndpoint{r: rateService}
+func NewGetRateEndpoint(ForexRateService *service.ForexRateService) *GetRateEndpoint {
+	return &GetRateEndpoint{r: ForexRateService}
 }
 
 func (e *GetRateEndpoint) GetRateByBaseCurrency(c *gin.Context) {

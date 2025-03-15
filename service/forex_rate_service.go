@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gavinklfong/go-rest-api-demo/apiclient"
+	"github.com/gavinklfong/go-rest-api-demo/dao"
 	"github.com/gavinklfong/go-rest-api-demo/model"
 	"github.com/xyproto/randomstring"
 )
@@ -12,17 +14,22 @@ import (
 var CURRENCIES = [...]string{"CAD", "USD", "EUR", "ISK", "PHP",
 	"DKK", "HUF", "CZK", "GBP", "RON", "SEK", "IDR", "INR", "BRL", "JPY"}
 
-type RateService struct{}
-
-func NewRateService() *RateService {
-	return &RateService{}
+type ForexRateService struct {
+	customerDao    *dao.CustomerDao
+	forexRateDao   *dao.ForexRateDao
+	forexApiClient *apiclient.ForexApiClient
 }
 
-func (s *RateService) GetRateByCurrencyPair(baseCurrency, counterCurrency string) *model.ForexRate {
+func NewForexRateService(customerDao *dao.CustomerDao, forexRateDao *dao.ForexRateDao,
+	forexApiClient *apiclient.ForexApiClient) *ForexRateService {
+	return &ForexRateService{customerDao, forexRateDao, forexApiClient}
+}
+
+func (s *ForexRateService) GetRateByCurrencyPair(baseCurrency, counterCurrency string) *model.ForexRate {
 	return buildForexRate(baseCurrency, counterCurrency)
 }
 
-func (s *RateService) GetRatesByBaseCurrency(baseCurrency string) []*model.ForexRate {
+func (s *ForexRateService) GetRatesByBaseCurrency(baseCurrency string) []*model.ForexRate {
 
 	var result []*model.ForexRate
 
@@ -36,7 +43,7 @@ func (s *RateService) GetRatesByBaseCurrency(baseCurrency string) []*model.Forex
 	return result
 }
 
-func (s *RateService) BookRate(request *model.ForexRateBookingRequest) *model.ForexRateBooking {
+func (s *ForexRateService) BookRate(request *model.ForexRateBookingRequest) *model.ForexRateBooking {
 	return &model.ForexRateBooking{
 		ForexRateBookingRequest: model.ForexRateBookingRequest{
 			BaseCurrency:       request.BaseCurrency,
