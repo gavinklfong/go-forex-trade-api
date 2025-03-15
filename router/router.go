@@ -25,7 +25,7 @@ func NewRouter(getRateEndpoint *endpoint.GetRateEndpoint,
 
 func (r *Router) doSetup() {
 
-	r.e.GET("/rates/:baseCurrency}/:counterCurrency", r.getRateEndpoint.GetRateByCurrencyPair)
+	r.e.GET("/rates/:baseCurrency/:counterCurrency", r.getRateEndpoint.GetRateByCurrencyPair)
 	r.e.GET("/rates/:baseCurrency", r.getRateEndpoint.GetRateByBaseCurrency)
 	r.e.GET("/rates/latest", r.getRateEndpoint.GetAllRates)
 

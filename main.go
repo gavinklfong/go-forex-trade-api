@@ -1,18 +1,22 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"log/slog"
 
 	"github.com/gavinklfong/go-rest-api-demo/apiclient"
 	"github.com/gavinklfong/go-rest-api-demo/config"
+	"github.com/gavinklfong/go-rest-api-demo/dao"
+	"github.com/gavinklfong/go-rest-api-demo/endpoint"
 	"github.com/gavinklfong/go-rest-api-demo/router"
+	"github.com/gavinklfong/go-rest-api-demo/service"
 	"go.uber.org/dig"
 )
 
 var c *dig.Container
 var r *router.Router
-var target *apiclient.ForexApiClient
 
 func main() {
 
@@ -31,44 +35,35 @@ func main() {
 		log.Panicf("fail to initialize target: %v", err)
 	}
 
-	// r.Run(fmt.Sprintf(":%s", config.AppConfig.ServerPort))
+	r.Run(fmt.Sprintf(":%d", config.AppConfig.ServerPort))
 
+	config.CloseDBConnection()
 }
 
 func initComponent() error {
-	return c.Invoke(func(t *apiclient.ForexApiClient) {
-		if t == nil {
-			slog.Error("target is nil")
-		}
+	return c.Invoke(func(t *router.Router) {
+		r = t
 	},
 	)
 }
 
-func initRouter() error {
-	return c.Invoke(
-		func(router *router.Router) {
-			r = router
-		},
-	)
-}
-
 func provideComponents() error {
-	c := dig.New()
-	// err := c.Provide(config.InitializeDBConnection)
-	// if err != nil {
-	// 	slog.Error("application initialization failed: %v", err)
-	// 	return err
-	// }
+	c = dig.New()
+	err := c.Provide(config.InitializeDBConnection)
+	if err != nil {
+		slog.Error("application initialization failed: %v", err)
+		return err
+	}
 
-	// err = c.Provide(func(db *sql.DB) (*dao.CustomerDao, *dao.ForexRateDao, *dao.ForexTradeDealDao) {
-	// 	return dao.NewCustomerDao(db), dao.NewForexRateDao(db), dao.NewForexTradeDealDao(db)
-	// })
-	// if err != nil {
-	// 	slog.Error("application initialization failed: %v", err)
-	// 	return err
-	// }
+	err = c.Provide(func(db *sql.DB) (*dao.CustomerDao, *dao.ForexRateDao, *dao.ForexTradeDealDao) {
+		return dao.NewCustomerDao(db), dao.NewForexRateDao(db), dao.NewForexTradeDealDao(db)
+	})
+	if err != nil {
+		slog.Error("application initialization failed: %v", err)
+		return err
+	}
 
-	err := c.Provide(func() *apiclient.ForexApiClient {
+	err = c.Provide(func() *apiclient.ForexApiClient {
 		return apiclient.NewForexApiClient(config.AppConfig.ForexRateApiUrl)
 	})
 	if err != nil {
@@ -76,29 +71,22 @@ func provideComponents() error {
 		return err
 	}
 
-	// err = c.Provide(service.NewForexRateService)
-	// err = c.Provide(service.NewForexTradeDealService)
-	// err = c.Provide(endpoint.NewBookRateEndpoint)
-	// err = c.Provide(endpoint.NewGetRateEndpoint)
-	// err = c.Provide(endpoint.NewTradeDealEndpoint)
-	// err = c.Provide(router.NewRouter)
+	providers := [...]interface{}{
+		service.NewForexRateService,
+		service.NewForexTradeDealService,
+		endpoint.NewBookRateEndpoint,
+		endpoint.NewGetRateEndpoint,
+		endpoint.NewTradeDealEndpoint,
+		router.NewRouter,
+	}
 
-	// providers := [...]interface{}{
-	// 	service.NewForexRateService,
-	// 	service.NewForexTradeDealService,
-	// 	endpoint.NewBookRateEndpoint,
-	// 	endpoint.NewGetRateEndpoint,
-	// 	endpoint.NewTradeDealEndpoint,
-	// 	router.NewRouter,
-	// }
-
-	// for _, provider := range providers {
-	// 	err = c.Provide(provider)
-	// 	if err != nil {
-	// 		slog.Error("application initialization failed: %v", err)
-	// 		return err
-	// 	}
-	// }
+	for _, provider := range providers {
+		err = c.Provide(provider)
+		if err != nil {
+			slog.Error("application initialization failed: %v", err)
+			return err
+		}
+	}
 
 	return nil
 
