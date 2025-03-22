@@ -17,8 +17,11 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeRouter() *router.Router {
-	db := config.InitializeDBConnection()
+func InitializeRouter() (*router.Router, error) {
+	db, err := config.InitializeDBConnection()
+	if err != nil {
+		return nil, err
+	}
 	customerDao := dao.NewCustomerDao(db)
 	forexRateDao := dao.NewForexRateDao(db)
 	forexApiClient := apiclient.NewForexApiClient()
@@ -29,5 +32,5 @@ func InitializeRouter() *router.Router {
 	forexTradeDealService := service.NewForexTradeDealService(forexTradeDealDao, forexRateService)
 	tradeDealEndpoint := endpoint.NewTradeDealEndpoint(forexTradeDealService)
 	routerRouter := router.NewRouter(getRateEndpoint, bookRateEndpoint, tradeDealEndpoint)
-	return routerRouter
+	return routerRouter, nil
 }

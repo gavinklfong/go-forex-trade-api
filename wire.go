@@ -13,7 +13,7 @@ import (
 	"github.com/google/wire"
 )
 
-func InitializeRouter() *router.Router {
+func InitializeRouter() (*router.Router, error) {
 
 	// var allProviders = wire.NewSet(apiclient.Providers, dao.Providers, service.Providers, endpoint.Providers, router.Providers)
 
@@ -22,7 +22,7 @@ func InitializeRouter() *router.Router {
 	wire.Build(config.InitializeDBConnection, apiclient.Providers,
 		dao.Providers, service.Providers, endpoint.Providers, router.Providers)
 
-	return &router.Router{}
+	return &router.Router{}, nil
 }
 
 // func injectForexApiClient() apiclient.ForexApiClient {

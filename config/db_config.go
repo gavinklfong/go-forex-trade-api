@@ -10,7 +10,7 @@ import (
 
 var db *sql.DB
 
-func InitializeDBConnection() *sql.DB {
+func InitializeDBConnection() (*sql.DB, error) {
 	cfg := mysql.Config{
 		User:      AppConfig.DbUser,
 		Passwd:    AppConfig.DbPassword,
@@ -26,10 +26,10 @@ func InitializeDBConnection() *sql.DB {
 	if err != nil {
 		slog.Error("fail initialize database connection: %v", err)
 		panic("fail to initalize database connection")
-		return nil
+		return nil, err
 	}
 
-	return db
+	return db, nil
 }
 
 func CloseDBConnection() {
