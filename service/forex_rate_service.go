@@ -15,18 +15,24 @@ import (
 var CURRENCIES = [...]string{"CAD", "USD", "EUR", "ISK", "PHP",
 	"DKK", "HUF", "CZK", "GBP", "RON", "SEK", "IDR", "INR", "BRL", "JPY"}
 
-type ForexRateService struct {
+type ForexRateService interface {
+	GetRateByCurrencyPair(baseCurrency, counterCurrency string) (*model.ForexRate, error)
+	GetRatesByBaseCurrency(baseCurrency string) []*model.ForexRate
+	BookRate(request *model.ForexRateBookingRequest) *model.ForexRateBooking
+}
+
+type ForexRateServiceImpl struct {
 	customerDao    *dao.CustomerDao
 	forexRateDao   *dao.ForexRateDao
 	forexApiClient *apiclient.ForexApiClient
 }
 
 func NewForexRateService(customerDao *dao.CustomerDao, forexRateDao *dao.ForexRateDao,
-	forexApiClient *apiclient.ForexApiClient) *ForexRateService {
-	return &ForexRateService{customerDao, forexRateDao, forexApiClient}
+	forexApiClient *apiclient.ForexApiClient) *ForexRateServiceImpl {
+	return &ForexRateServiceImpl{customerDao, forexRateDao, forexApiClient}
 }
 
-func (s *ForexRateService) GetRateByCurrencyPair(baseCurrency, counterCurrency string) (*model.ForexRate, error) {
+func (s *ForexRateServiceImpl) GetRateByCurrencyPair(baseCurrency, counterCurrency string) (*model.ForexRate, error) {
 	rate, err := s.forexApiClient.GetLatestRate(baseCurrency, counterCurrency)
 	if err != nil {
 		slog.Error("forex api returned error: %v", err)
@@ -43,7 +49,7 @@ func (s *ForexRateService) GetRateByCurrencyPair(baseCurrency, counterCurrency s
 	}, nil
 }
 
-func (s *ForexRateService) GetRatesByBaseCurrency(baseCurrency string) []*model.ForexRate {
+func (s *ForexRateServiceImpl) GetRatesByBaseCurrency(baseCurrency string) []*model.ForexRate {
 
 	var result []*model.ForexRate
 
@@ -57,7 +63,7 @@ func (s *ForexRateService) GetRatesByBaseCurrency(baseCurrency string) []*model.
 	return result
 }
 
-func (s *ForexRateService) BookRate(request *model.ForexRateBookingRequest) *model.ForexRateBooking {
+func (s *ForexRateServiceImpl) BookRate(request *model.ForexRateBookingRequest) *model.ForexRateBooking {
 	return &model.ForexRateBooking{
 		ForexRateBookingRequest: model.ForexRateBookingRequest{
 			BaseCurrency:       request.BaseCurrency,

@@ -19,10 +19,10 @@ type GetRateByCurrencyPairRequest struct {
 }
 
 type GetRateController struct {
-	r *service.ForexRateService
+	r service.ForexRateService
 }
 
-func NewGetRateController(ForexRateService *service.ForexRateService) *GetRateController {
+func NewGetRateController(ForexRateService service.ForexRateService) *GetRateController {
 	return &GetRateController{r: ForexRateService}
 }
 
@@ -47,7 +47,11 @@ func (e *GetRateController) GetRateByCurrencyPair(c *gin.Context) {
 		return
 	}
 
-	rate := e.r.GetRateByCurrencyPair(request.BaseCurrency, request.CounterCurrency)
+	rate, err := e.r.GetRateByCurrencyPair(request.BaseCurrency, request.CounterCurrency)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, rate)
 }
