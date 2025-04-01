@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log/slog"
 	"math/rand/v2"
 	"strings"
 	"time"
@@ -25,8 +26,21 @@ func NewForexRateService(customerDao *dao.CustomerDao, forexRateDao *dao.ForexRa
 	return &ForexRateService{customerDao, forexRateDao, forexApiClient}
 }
 
-func (s *ForexRateService) GetRateByCurrencyPair(baseCurrency, counterCurrency string) *model.ForexRate {
-	return buildForexRate(baseCurrency, counterCurrency)
+func (s *ForexRateService) GetRateByCurrencyPair(baseCurrency, counterCurrency string) (*model.ForexRate, error) {
+	rate, err := s.forexApiClient.GetLatestRate(baseCurrency, counterCurrency)
+	if err != nil {
+		slog.Error("forex api returned error: %v", err)
+		return nil, err
+	}
+
+	return &model.ForexRate{
+		Timestamp:       time.Now(),
+		BaseCurrency:    baseCurrency,
+		CounterCurrency: counterCurrency,
+		BuyRate:         rate.BuyRate,
+		SellRate:        rate.SellRate,
+		Spread:          rand.Float32(),
+	}, nil
 }
 
 func (s *ForexRateService) GetRatesByBaseCurrency(baseCurrency string) []*model.ForexRate {

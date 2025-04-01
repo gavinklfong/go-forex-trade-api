@@ -1,4 +1,4 @@
-package endpoint
+package controller
 
 import (
 	"net/http"
@@ -18,15 +18,15 @@ type GetRateByCurrencyPairRequest struct {
 	CounterCurrency string `uri:"counterCurrency" binding:"required,string"`
 }
 
-type GetRateEndpoint struct {
+type GetRateController struct {
 	r *service.ForexRateService
 }
 
-func NewGetRateEndpoint(ForexRateService *service.ForexRateService) *GetRateEndpoint {
-	return &GetRateEndpoint{r: ForexRateService}
+func NewGetRateController(ForexRateService *service.ForexRateService) *GetRateController {
+	return &GetRateController{r: ForexRateService}
 }
 
-func (e *GetRateEndpoint) GetRateByBaseCurrency(c *gin.Context) {
+func (e *GetRateController) GetRateByBaseCurrency(c *gin.Context) {
 	var request GetRateByBaseCurrencyRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -39,7 +39,7 @@ func (e *GetRateEndpoint) GetRateByBaseCurrency(c *gin.Context) {
 	c.JSON(http.StatusOK, rates)
 }
 
-func (e *GetRateEndpoint) GetRateByCurrencyPair(c *gin.Context) {
+func (e *GetRateController) GetRateByCurrencyPair(c *gin.Context) {
 	var request GetRateByCurrencyPairRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -52,7 +52,7 @@ func (e *GetRateEndpoint) GetRateByCurrencyPair(c *gin.Context) {
 	c.JSON(http.StatusOK, rate)
 }
 
-func (e *GetRateEndpoint) GetAllRates(c *gin.Context) {
+func (e *GetRateController) GetAllRates(c *gin.Context) {
 	rates := e.r.GetRatesByBaseCurrency(DEFAULT_BASE_CURRENCY)
 	c.JSON(http.StatusOK, rates)
 }

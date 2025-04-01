@@ -8,8 +8,8 @@ import (
 
 	"github.com/gavinklfong/go-rest-api-demo/apiclient"
 	"github.com/gavinklfong/go-rest-api-demo/config"
+	"github.com/gavinklfong/go-rest-api-demo/controller"
 	"github.com/gavinklfong/go-rest-api-demo/dao"
-	"github.com/gavinklfong/go-rest-api-demo/endpoint"
 	"github.com/gavinklfong/go-rest-api-demo/router"
 	"github.com/gavinklfong/go-rest-api-demo/service"
 	"go.uber.org/dig"
@@ -74,9 +74,9 @@ func provideComponents() error {
 	providers := [...]interface{}{
 		service.NewForexRateService,
 		service.NewForexTradeDealService,
-		endpoint.NewBookRateEndpoint,
-		endpoint.NewGetRateEndpoint,
-		endpoint.NewTradeDealEndpoint,
+		controller.NewBookRateController,
+		controller.NewGetRateController,
+		controller.NewTradeDealController,
 		router.NewRouter,
 	}
 
