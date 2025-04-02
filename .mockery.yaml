@@ -1,4 +1,5 @@
 with-expecter: true
+dir: "{{.PackageName}}/mocks"
 packages:
     github.com/gavinklfong/go-forex-trade-api:
         config:
