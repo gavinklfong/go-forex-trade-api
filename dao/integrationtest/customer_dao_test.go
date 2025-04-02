@@ -11,8 +11,8 @@ import (
 
 	"math/rand"
 
-	"github.com/gavinklfong/go-rest-api-demo/dao"
-	"github.com/gavinklfong/go-rest-api-demo/model"
+	"github.com/gavinklfong/go-forex-trade-api/dao"
+	"github.com/gavinklfong/go-forex-trade-api/model"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 	"github.com/jaswdr/faker"

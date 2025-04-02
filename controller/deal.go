@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/gavinklfong/go-rest-api-demo/service"
+	"github.com/gavinklfong/go-forex-trade-api/service"
 	"github.com/gin-gonic/gin"
 )
 

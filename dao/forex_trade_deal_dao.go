@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log/slog"
 
-	"github.com/gavinklfong/go-rest-api-demo/model"
+	"github.com/gavinklfong/go-forex-trade-api/model"
 )
 
 type ForexTradeDealDao struct {

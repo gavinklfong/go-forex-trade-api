@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gavinklfong/go-rest-api-demo/apiclient/model"
+	"github.com/gavinklfong/go-forex-trade-api/apiclient/model"
 )
 
 type ForexApiClient struct {

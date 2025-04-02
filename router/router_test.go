@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gavinklfong/go-rest-api-demo/model"
+	"github.com/gavinklfong/go-forex-trade-api/model"
 	"github.com/stretchr/testify/assert"
 )
 

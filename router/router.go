@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/gavinklfong/go-rest-api-demo/controller"
+	"github.com/gavinklfong/go-forex-trade-api/controller"
 	"github.com/gin-gonic/gin"
 )
 

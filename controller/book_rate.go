@@ -3,16 +3,16 @@ package controller
 import (
 	"net/http"
 
-	"github.com/gavinklfong/go-rest-api-demo/model"
-	"github.com/gavinklfong/go-rest-api-demo/service"
+	"github.com/gavinklfong/go-forex-trade-api/model"
+	"github.com/gavinklfong/go-forex-trade-api/service"
 	"github.com/gin-gonic/gin"
 )
 
 type BookRateController struct {
-	r *service.ForexRateService
+	r service.ForexRateService
 }
 
-func NewBookRateController(rateService *service.ForexRateService) *BookRateController {
+func NewBookRateController(rateService service.ForexRateService) *BookRateController {
 	return &BookRateController{r: rateService}
 }
 

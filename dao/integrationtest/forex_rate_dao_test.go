@@ -9,8 +9,8 @@ import (
 
 	"database/sql"
 
-	"github.com/gavinklfong/go-rest-api-demo/dao"
-	"github.com/gavinklfong/go-rest-api-demo/model"
+	"github.com/gavinklfong/go-forex-trade-api/dao"
+	"github.com/gavinklfong/go-forex-trade-api/model"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gavinklfong/go-rest-api-demo/apiclient"
-	"github.com/gavinklfong/go-rest-api-demo/dao"
-	"github.com/gavinklfong/go-rest-api-demo/model"
+	"github.com/gavinklfong/go-forex-trade-api/apiclient"
+	"github.com/gavinklfong/go-forex-trade-api/dao"
+	"github.com/gavinklfong/go-forex-trade-api/model"
 	"github.com/xyproto/randomstring"
 )
 

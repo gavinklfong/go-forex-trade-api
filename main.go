@@ -6,12 +6,12 @@ import (
 	"log"
 	"log/slog"
 
-	"github.com/gavinklfong/go-rest-api-demo/apiclient"
-	"github.com/gavinklfong/go-rest-api-demo/config"
-	"github.com/gavinklfong/go-rest-api-demo/controller"
-	"github.com/gavinklfong/go-rest-api-demo/dao"
-	"github.com/gavinklfong/go-rest-api-demo/router"
-	"github.com/gavinklfong/go-rest-api-demo/service"
+	"github.com/gavinklfong/go-forex-trade-api/apiclient"
+	"github.com/gavinklfong/go-forex-trade-api/config"
+	"github.com/gavinklfong/go-forex-trade-api/controller"
+	"github.com/gavinklfong/go-forex-trade-api/dao"
+	"github.com/gavinklfong/go-forex-trade-api/router"
+	"github.com/gavinklfong/go-forex-trade-api/service"
 	"go.uber.org/dig"
 )
 

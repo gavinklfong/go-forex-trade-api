@@ -1,0 +1,6 @@
+with-expecter: true
+packages:
+    github.com/gavinklfong/go-forex-trade-api:
+        config:
+            all: true
+            recursive: true
