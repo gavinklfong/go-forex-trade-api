@@ -55,7 +55,7 @@ func provideComponents() error {
 		return err
 	}
 
-	err = c.Provide(func(db *sql.DB) (*dao.CustomerDao, *dao.ForexRateDao, *dao.ForexTradeDealDao) {
+	err = c.Provide(func(db *sql.DB) (dao.CustomerDao, dao.ForexRateDao, dao.ForexTradeDealDao) {
 		return dao.NewCustomerDao(db), dao.NewForexRateDao(db), dao.NewForexTradeDealDao(db)
 	})
 	if err != nil {
@@ -63,7 +63,7 @@ func provideComponents() error {
 		return err
 	}
 
-	err = c.Provide(func() *apiclient.ForexApiClient {
+	err = c.Provide(func() apiclient.ForexApiClient {
 		return apiclient.NewForexApiClient(config.AppConfig.ForexRateApiUrl)
 	})
 	if err != nil {

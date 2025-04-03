@@ -10,6 +10,6 @@ type ForexTradeDealServiceImpl struct {
 	forexRateService ForexRateService
 }
 
-func NewForexTradeDealService(dao *dao.ForexTradeDealDao, forexRateService ForexRateService) *ForexTradeDealServiceImpl {
+func NewForexTradeDealService(dao *dao.ForexTradeDealDao, forexRateService ForexRateService) ForexTradeDealService {
 	return &ForexTradeDealServiceImpl{dao, forexRateService}
 }

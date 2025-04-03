@@ -24,16 +24,16 @@ type ForexRateService interface {
 type ForexRateServiceImpl struct {
 	customerDao    *dao.CustomerDao
 	forexRateDao   *dao.ForexRateDao
-	forexApiClient *apiclient.ForexApiClient
+	forexApiClient apiclient.ForexApiClient
 }
 
 func NewForexRateService(customerDao *dao.CustomerDao, forexRateDao *dao.ForexRateDao,
-	forexApiClient *apiclient.ForexApiClient) *ForexRateServiceImpl {
+	forexApiClient apiclient.ForexApiClient) ForexRateService {
 	return &ForexRateServiceImpl{customerDao, forexRateDao, forexApiClient}
 }
 
 func (s *ForexRateServiceImpl) GetRateByCurrencyPair(baseCurrency, counterCurrency string) (*model.ForexRate, error) {
-	rate, err := s.forexApiClient.GetLatestRate(baseCurrency, counterCurrency)
+	rate, err := s.forexApiClient.GetRateByCurrencyPair(baseCurrency, counterCurrency)
 	if err != nil {
 		slog.Error("forex api returned error: %v", err)
 		return nil, err
@@ -64,6 +64,7 @@ func (s *ForexRateServiceImpl) GetRatesByBaseCurrency(baseCurrency string) []*mo
 }
 
 func (s *ForexRateServiceImpl) BookRate(request *model.ForexRateBookingRequest) *model.ForexRateBooking {
+
 	return &model.ForexRateBooking{
 		ForexRateBookingRequest: model.ForexRateBookingRequest{
 			BaseCurrency:       request.BaseCurrency,

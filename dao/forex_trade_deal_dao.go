@@ -7,15 +7,20 @@ import (
 	"github.com/gavinklfong/go-forex-trade-api/model"
 )
 
-type ForexTradeDealDao struct {
+type ForexTradeDealDao interface {
+	Insert(deal *model.ForexTradeDeal) (int64, error)
+	FindByID(id string) (*model.ForexTradeDeal, error)
+}
+
+type ForexTradeDealDaoImpl struct {
 	db *sql.DB
 }
 
-func NewForexTradeDealDao(db *sql.DB) *ForexTradeDealDao {
-	return &ForexTradeDealDao{db: db}
+func NewForexTradeDealDao(db *sql.DB) ForexTradeDealDao {
+	return &ForexTradeDealDaoImpl{db: db}
 }
 
-func (dao *ForexTradeDealDao) Insert(deal *model.ForexTradeDeal) (int64, error) {
+func (dao *ForexTradeDealDaoImpl) Insert(deal *model.ForexTradeDeal) (int64, error) {
 	result, err := dao.db.Exec(`
 	INSERT INTO forex_trade_deal(id, ref, timestamp, base_currency, counter_currency, rate, 
 	trade_action, base_currency_amount, customer_id) VALUES "
@@ -36,7 +41,7 @@ func (dao *ForexTradeDealDao) Insert(deal *model.ForexTradeDeal) (int64, error) 
 	return count, nil
 }
 
-func (dao *ForexTradeDealDao) FindByID(id string) (*model.ForexTradeDeal, error) {
+func (dao *ForexTradeDealDaoImpl) FindByID(id string) (*model.ForexTradeDeal, error) {
 	var deal model.ForexTradeDeal
 	err := dao.db.QueryRow(`SELECT id, ref, timestamp, base_currency, counter_currency, rate, 
 	trade_action, base_currency_amount, customer_id
