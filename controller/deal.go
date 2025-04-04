@@ -6,10 +6,10 @@ import (
 )
 
 type TradeDealController struct {
-	forexTradeDealService *service.ForexTradeDealService
+	forexTradeDealService service.ForexTradeDealService
 }
 
-func NewTradeDealController(forexTradeDealService *service.ForexTradeDealService) *TradeDealController {
+func NewTradeDealController(forexTradeDealService service.ForexTradeDealService) *TradeDealController {
 	return &TradeDealController{forexTradeDealService}
 }
 

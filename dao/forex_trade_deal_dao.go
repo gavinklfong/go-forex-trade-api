@@ -7,11 +7,6 @@ import (
 	"github.com/gavinklfong/go-forex-trade-api/model"
 )
 
-type ForexTradeDealDao interface {
-	Insert(deal *model.ForexTradeDeal) (int64, error)
-	FindByID(id string) (*model.ForexTradeDeal, error)
-}
-
 type ForexTradeDealDaoImpl struct {
 	db *sql.DB
 }

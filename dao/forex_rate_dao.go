@@ -7,11 +7,6 @@ import (
 	"github.com/gavinklfong/go-forex-trade-api/model"
 )
 
-type ForexRateDao interface {
-	Insert(booking *model.ForexRateBooking) (int64, error)
-	FindByID(id string) (*model.ForexRateBooking, error)
-}
-
 type ForexRateDaoImpl struct {
 	db *sql.DB
 }

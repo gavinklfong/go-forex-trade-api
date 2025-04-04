@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"log/slog"
 	"math/rand/v2"
 	"strings"
@@ -15,36 +16,38 @@ import (
 var CURRENCIES = [...]string{"CAD", "USD", "EUR", "ISK", "PHP",
 	"DKK", "HUF", "CZK", "GBP", "RON", "SEK", "IDR", "INR", "BRL", "JPY"}
 
-type ForexRateService interface {
-	GetRateByCurrencyPair(baseCurrency, counterCurrency string) (*model.ForexRate, error)
-	GetRatesByBaseCurrency(baseCurrency string) []*model.ForexRate
-	BookRate(request *model.ForexRateBookingRequest) *model.ForexRateBooking
-}
-
 type ForexRateServiceImpl struct {
-	customerDao    *dao.CustomerDao
-	forexRateDao   *dao.ForexRateDao
-	forexApiClient apiclient.ForexApiClient
+	customerDao         dao.CustomerDao
+	forexRateDao        dao.ForexRateDao
+	forexApiClient      apiclient.ForexApiClient
+	forexPricingService ForexPricingService
 }
 
-func NewForexRateService(customerDao *dao.CustomerDao, forexRateDao *dao.ForexRateDao,
-	forexApiClient apiclient.ForexApiClient) ForexRateService {
-	return &ForexRateServiceImpl{customerDao, forexRateDao, forexApiClient}
+func NewForexRateService(customerDao dao.CustomerDao, forexRateDao dao.ForexRateDao,
+	forexApiClient apiclient.ForexApiClient, forexPricingService ForexPricingService) ForexRateService {
+	return &ForexRateServiceImpl{customerDao, forexRateDao, forexApiClient, forexPricingService}
 }
 
 func (s *ForexRateServiceImpl) GetRateByCurrencyPair(baseCurrency, counterCurrency string) (*model.ForexRate, error) {
 	rate, err := s.forexApiClient.GetRateByCurrencyPair(baseCurrency, counterCurrency)
 	if err != nil {
-		slog.Error("forex api returned error: %v", err)
+		slog.Error(fmt.Sprintf("forex api returned error: %v", err))
 		return nil, err
 	}
 
+	// type ForexRateResponse struct {
+	// 	ID    string
+	// 	Date  time.Time
+	// 	Base  string
+	// 	Rates map[string]float32
+	// }
+
 	return &model.ForexRate{
-		Timestamp:       time.Now(),
+		Timestamp:       rate.Date,
 		BaseCurrency:    baseCurrency,
 		CounterCurrency: counterCurrency,
-		BuyRate:         rate.BuyRate,
-		SellRate:        rate.SellRate,
+		BuyRate:         0.0,
+		SellRate:        0.0,
 		Spread:          rand.Float32(),
 	}, nil
 }

@@ -7,12 +7,6 @@ import (
 	"github.com/gavinklfong/go-forex-trade-api/model"
 )
 
-type CustomerDao interface {
-	Insert(customer *model.Customer) (int64, error)
-	FindByID(id string) (*model.Customer, error)
-	FindByTier(tier int) (result []*model.Customer, err error)
-}
-
 type CustomerDaoImpl struct {
 	db *sql.DB
 }
