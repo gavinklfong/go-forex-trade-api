@@ -17,15 +17,15 @@ var CURRENCIES = [...]string{"CAD", "USD", "EUR", "ISK", "PHP",
 	"DKK", "HUF", "CZK", "GBP", "RON", "SEK", "IDR", "INR", "BRL", "JPY"}
 
 type ForexRateServiceImpl struct {
-	customerDao         dao.CustomerDao
-	forexRateDao        dao.ForexRateDao
-	forexApiClient      apiclient.ForexApiClient
-	forexPricingService ForexPricingService
+	customerDao     dao.CustomerDao
+	forexRateDao    dao.ForexRateDao
+	forexPricingDao dao.ForexPricingDao
+	forexApiClient  apiclient.ForexApiClient
 }
 
 func NewForexRateService(customerDao dao.CustomerDao, forexRateDao dao.ForexRateDao,
-	forexApiClient apiclient.ForexApiClient, forexPricingService ForexPricingService) ForexRateService {
-	return &ForexRateServiceImpl{customerDao, forexRateDao, forexApiClient, forexPricingService}
+	forexApiClient apiclient.ForexApiClient, forexPricingDao dao.ForexPricingDao) ForexRateService {
+	return &ForexRateServiceImpl{customerDao, forexRateDao, forexPricingDao, forexApiClient}
 }
 
 func (s *ForexRateServiceImpl) GetRateByCurrencyPair(baseCurrency, counterCurrency string) (*model.ForexRate, error) {
