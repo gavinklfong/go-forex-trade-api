@@ -29,30 +29,42 @@ func NewForexRateService(customerDao dao.CustomerDao, forexRateDao dao.ForexRate
 }
 
 func (s *ForexRateServiceImpl) GetRateByCurrencyPair(baseCurrency, counterCurrency string) (*model.ForexRate, error) {
-	rate, err := s.forexApiClient.GetRateByCurrencyPair(baseCurrency, counterCurrency)
+	forexRate, err := s.forexApiClient.GetRateByCurrencyPair(baseCurrency, counterCurrency)
 	if err != nil {
 		slog.Error(fmt.Sprintf("forex api returned error: %v", err))
 		return nil, err
 	}
 
-	// type ForexRateResponse struct {
-	// 	ID    string
-	// 	Date  time.Time
-	// 	Base  string
-	// 	Rates map[string]float32
-	// }
+	pricing := s.forexPricingDao.GetPricingByCurrencyPair(baseCurrency, counterCurrency)
+	if pricing == nil {
+		return nil, fmt.Errorf("pricing entry does not exist for %s/%s", baseCurrency, counterCurrency)
+	}
+
+	rate, exist := forexRate.Rates[counterCurrency]
+	if !exist {
+		return nil, fmt.Errorf("Forex rate not found for %s/%s", baseCurrency, counterCurrency)
+	}
 
 	return &model.ForexRate{
-		Timestamp:       rate.Date,
+		Timestamp:       forexRate.Date,
 		BaseCurrency:    baseCurrency,
 		CounterCurrency: counterCurrency,
-		BuyRate:         0.0,
-		SellRate:        0.0,
-		Spread:          rand.Float32(),
+		BuyRate:         rate + pricing.BuyPip/10000,
+		SellRate:        rate + pricing.SellPip/10000,
+		Spread:          pricing.GetSpread(),
 	}, nil
 }
 
-func (s *ForexRateServiceImpl) GetRatesByBaseCurrency(baseCurrency string) []*model.ForexRate {
+func (s *ForexRateServiceImpl) GetRatesByBaseCurrency(baseCurrency string) ([]*model.ForexRate, error) {
+	forexRate, err := s.forexApiClient.GetRateByBaseCurrency(baseCurrency)
+	if err != nil {
+		slog.Error(fmt.Sprintf("forex api returned error: %v", err))
+		return nil, err
+	}
+
+	_, v := range forexRate.Rates {
+		
+	}
 
 	var result []*model.ForexRate
 
