@@ -1,4 +1,4 @@
-package service
+package dao
 
 import (
 	"encoding/csv"
@@ -6,32 +6,31 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/gavinklfong/go-forex-trade-api/model"
 )
 
-type ForexPricingServiceImpl struct {
-	forexPricingByBaseCurrency map[string][]*model.ForexPricing
+type ForexPricingDaoImpl struct {
+	entries map[string]model.ForexPricing
 }
 
-func NewForexPricingService(csvFilePath string) (ForexPricingService, error) {
-	forexPricing, err := initializeForexPricing(csvFilePath)
+func NewForexPricingDao(csvFilePath string) (ForexPricingDao, error) {
+	entries, err := initializeForexPricing(csvFilePath)
 	if err != nil {
 		slog.Error(fmt.Sprintf("failed to initialize forex pricing with %s, error: %v", csvFilePath, err))
 		return nil, err
 	}
-	return &ForexPricingServiceImpl{forexPricing}, nil
+	return &ForexPricingDaoImpl{entries}, nil
 }
 
-func initializeForexPricing(filePath string) (map[string][]*model.ForexPricing, error) {
+func initializeForexPricing(filePath string) (map[string]model.ForexPricing, error) {
 	records, err := readCsvFile(filePath)
 	if err != nil {
 		slog.Error(fmt.Sprintf("failed to read CSV %s", filePath))
 		return nil, err
 	}
 
-	result := make(map[string][]*model.ForexPricing)
+	entries := make(map[string]model.ForexPricing)
 	for _, v := range records {
 
 		buyPip, err := strconv.ParseFloat(v[2], 32)
@@ -51,15 +50,10 @@ func initializeForexPricing(filePath string) (map[string][]*model.ForexPricing, 
 			SellPip:         float32(sellPip),
 		}
 
-		pricingList, exist := result[v[0]]
-		if !exist {
-
-		} else {
-
-		}
+		entries[fmt.Sprintf("%s-%s", v[0], v[1])] = newEntry
 	}
 
-	return nil, nil
+	return entries, nil
 }
 
 func readCsvFile(filePath string) ([][]string, error) {
@@ -80,26 +74,10 @@ func readCsvFile(filePath string) ([][]string, error) {
 	return records, nil
 }
 
-func (s *ForexPricingServiceImpl) GetPricingByCurrencyPair(base, counter string) *model.ForexPricing {
-	pricing, exist := s.forexPricingByBaseCurrency[base]
+func (s *ForexPricingDaoImpl) GetPricingByCurrencyPair(base, counter string) *model.ForexPricing {
+	pricing, exist := s.entries[fmt.Sprintf("%s-%s", base, counter)]
 	if !exist {
 		return nil
 	}
-
-	for _, v := range pricing {
-		if strings.Compare(counter, v.CounterCurrency) == 0 {
-			return v
-		}
-	}
-
-	return nil
-}
-
-func (s *ForexPricingServiceImpl) GetPricingByBaseCurrency(base string) []*model.ForexPricing {
-	pricing, exist := s.forexPricingByBaseCurrency[base]
-	if !exist {
-		return nil
-	}
-
-	return pricing
+	return &pricing
 }

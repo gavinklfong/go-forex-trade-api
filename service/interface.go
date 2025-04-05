@@ -10,8 +10,3 @@ type ForexRateService interface {
 
 type ForexTradeDealService interface {
 }
-
-type ForexPricingService interface {
-	GetPricingByCurrencyPair(base, counter string) *model.ForexPricing
-	GetPricingByBaseCurrency(base string) []*model.ForexPricing
-}

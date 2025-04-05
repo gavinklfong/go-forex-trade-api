@@ -45,7 +45,7 @@ func (c *ForexApiClientImpl) GetRateByCurrencyPair(base, counter string) (*model
 
 func (c *ForexApiClientImpl) GetRateByBaseCurrency(base string) (*model.ForexRateResponse, error) {
 	requestURL := fmt.Sprintf("%s/rates/%s", c.url, base)
-	slog.Info("GET %s", requestURL)
+	slog.Info(fmt.Sprintf("GET %s", requestURL))
 	res, err := http.Get(requestURL)
 	if err != nil {
 		slog.Error("error making http request: %s\n", err)

@@ -17,3 +17,7 @@ type ForexTradeDealDao interface {
 	Insert(deal *model.ForexTradeDeal) (int64, error)
 	FindByID(id string) (*model.ForexTradeDeal, error)
 }
+
+type ForexPricingDao interface {
+	GetPricingByCurrencyPair(base, counter string) *model.ForexPricing
+}
