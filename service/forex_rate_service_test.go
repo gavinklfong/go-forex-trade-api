@@ -135,3 +135,24 @@ func (s *ForexRateServiceTestSuite) TestGetRateByBaseCurrency() {
 	s.mockForexApiClient.AssertExpectations(s.T())
 	s.mockForexPricingDao.AssertExpectations(s.T())
 }
+
+func (s *ForexRateServiceTestSuite) TestGetRateByCurrencyPairWithUnknownBaseCurrency() {
+
+	forexRates, err := s.forexRateService.GetRateByCurrencyPair("ZZZ", "USD")
+	s.Nil(forexRates)
+	s.NotNil(err)
+}
+
+func (s *ForexRateServiceTestSuite) TestGetRateByCurrencyPairWithUnknownCounterCurrency() {
+
+	forexRates, err := s.forexRateService.GetRateByCurrencyPair("USD", "ZZZ")
+	s.Nil(forexRates)
+	s.NotNil(err)
+}
+
+func (s *ForexRateServiceTestSuite) TestGetRateByBaseCurrencyWithUnknownCurrency() {
+
+	forexRates, err := s.forexRateService.GetRatesByBaseCurrency("ZZZ")
+	s.Nil(forexRates)
+	s.NotNil(err)
+}
