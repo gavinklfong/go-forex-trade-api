@@ -13,7 +13,7 @@ type TimeProvider interface {
 type ForexRateService interface {
 	GetRateByCurrencyPair(baseCurrency, counterCurrency string) (*model.ForexRate, error)
 	GetRatesByBaseCurrency(baseCurrency string) ([]*model.ForexRate, error)
-	BookRate(request *model.ForexRateBookingRequest) *model.ForexRateBooking
+	BookRate(request *model.ForexRateBookingRequest) (*model.ForexRateBooking, error)
 }
 
 type ForexTradeDealService interface {

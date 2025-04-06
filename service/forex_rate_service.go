@@ -75,7 +75,7 @@ func (s *ForexRateServiceImpl) GetRatesByBaseCurrency(baseCurrency string) ([]*m
 	return forexRates, nil
 }
 
-func (s *ForexRateServiceImpl) BookRate(request *model.ForexRateBookingRequest) *model.ForexRateBooking {
+func (s *ForexRateServiceImpl) BookRate(request *model.ForexRateBookingRequest) (*model.ForexRateBooking, error) {
 
 	return &model.ForexRateBooking{
 		ForexRateBookingRequest: model.ForexRateBookingRequest{
@@ -89,7 +89,7 @@ func (s *ForexRateServiceImpl) BookRate(request *model.ForexRateBookingRequest) 
 		Rate:       rand.Float32(),
 		BookingRef: randomstring.String(8),
 		ExpiryTime: time.Now().Add(time.Second * 30),
-	}
+	}, nil
 }
 
 func (s *ForexRateServiceImpl) buildForexRate(baseCurrency, counterCurrency string, rate float32) (*model.ForexRate, error) {
