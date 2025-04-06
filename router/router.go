@@ -27,7 +27,7 @@ func (r *Router) doSetup() {
 
 	r.e.GET("/rates/:baseCurrency/:counterCurrency", r.getRateController.GetRateByCurrencyPair)
 	r.e.GET("/rates/:baseCurrency", r.getRateController.GetRateByBaseCurrency)
-	r.e.GET("/rates/latest", r.getRateController.GetAllRates)
+	r.e.GET("/rates/latest", r.getRateController.GetDefaultRates)
 
 	r.e.POST("/rates/book", r.bookRateController.BookRate)
 

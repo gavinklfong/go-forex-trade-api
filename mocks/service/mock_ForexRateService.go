@@ -128,7 +128,7 @@ func (_c *MockForexRateService_GetRateByCurrencyPair_Call) RunAndReturn(run func
 }
 
 // GetRatesByBaseCurrency provides a mock function with given fields: baseCurrency
-func (_m *MockForexRateService) GetRatesByBaseCurrency(baseCurrency string) []*model.ForexRate {
+func (_m *MockForexRateService) GetRatesByBaseCurrency(baseCurrency string) ([]*model.ForexRate, error) {
 	ret := _m.Called(baseCurrency)
 
 	if len(ret) == 0 {
@@ -136,6 +136,10 @@ func (_m *MockForexRateService) GetRatesByBaseCurrency(baseCurrency string) []*m
 	}
 
 	var r0 []*model.ForexRate
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) ([]*model.ForexRate, error)); ok {
+		return rf(baseCurrency)
+	}
 	if rf, ok := ret.Get(0).(func(string) []*model.ForexRate); ok {
 		r0 = rf(baseCurrency)
 	} else {
@@ -144,7 +148,13 @@ func (_m *MockForexRateService) GetRatesByBaseCurrency(baseCurrency string) []*m
 		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(baseCurrency)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // MockForexRateService_GetRatesByBaseCurrency_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetRatesByBaseCurrency'
@@ -165,12 +175,12 @@ func (_c *MockForexRateService_GetRatesByBaseCurrency_Call) Run(run func(baseCur
 	return _c
 }
 
-func (_c *MockForexRateService_GetRatesByBaseCurrency_Call) Return(_a0 []*model.ForexRate) *MockForexRateService_GetRatesByBaseCurrency_Call {
-	_c.Call.Return(_a0)
+func (_c *MockForexRateService_GetRatesByBaseCurrency_Call) Return(_a0 []*model.ForexRate, _a1 error) *MockForexRateService_GetRatesByBaseCurrency_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockForexRateService_GetRatesByBaseCurrency_Call) RunAndReturn(run func(string) []*model.ForexRate) *MockForexRateService_GetRatesByBaseCurrency_Call {
+func (_c *MockForexRateService_GetRatesByBaseCurrency_Call) RunAndReturn(run func(string) ([]*model.ForexRate, error)) *MockForexRateService_GetRatesByBaseCurrency_Call {
 	_c.Call.Return(run)
 	return _c
 }

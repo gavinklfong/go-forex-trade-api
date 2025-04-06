@@ -34,7 +34,11 @@ func (e *GetRateController) GetRateByBaseCurrency(c *gin.Context) {
 		return
 	}
 
-	rates := e.r.GetRatesByBaseCurrency(request.BaseCurrency)
+	rates, err := e.r.GetRatesByBaseCurrency(request.BaseCurrency)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, rates)
 }
@@ -56,7 +60,12 @@ func (e *GetRateController) GetRateByCurrencyPair(c *gin.Context) {
 	c.JSON(http.StatusOK, rate)
 }
 
-func (e *GetRateController) GetAllRates(c *gin.Context) {
-	rates := e.r.GetRatesByBaseCurrency(DEFAULT_BASE_CURRENCY)
+func (e *GetRateController) GetDefaultRates(c *gin.Context) {
+	rates, err := e.r.GetRatesByBaseCurrency(DEFAULT_BASE_CURRENCY)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, rates)
 }
