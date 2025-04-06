@@ -51,7 +51,7 @@ func provideComponents() error {
 	c = dig.New()
 	err := c.Provide(config.InitializeDBConnection)
 	if err != nil {
-		slog.Error("application initialization failed: %v", err)
+		slog.Error(fmt.Sprintf("application initialization failed: %v", err))
 		return err
 	}
 
@@ -59,7 +59,7 @@ func provideComponents() error {
 		return dao.NewCustomerDao(db), dao.NewForexRateDao(db), dao.NewForexTradeDealDao(db)
 	})
 	if err != nil {
-		slog.Error("application initialization failed: %v", err)
+		slog.Error(fmt.Sprintf("application initialization failed: %v", err))
 		return err
 	}
 
@@ -67,11 +67,20 @@ func provideComponents() error {
 		return apiclient.NewForexApiClient(config.AppConfig.ForexRateApiUrl)
 	})
 	if err != nil {
-		slog.Error("application initialization failed: %v", err)
+		slog.Error(fmt.Sprintf("application initialization failed: %v", err))
+		return err
+	}
+
+	err = c.Provide(func() (dao.ForexPricingDao, error) {
+		return dao.NewForexPricingDao("./config/pricing.csv")
+	})
+	if err != nil {
+		slog.Error(fmt.Sprintf("application initialization failed: %v", err))
 		return err
 	}
 
 	providers := [...]interface{}{
+		service.NewTimeProvider,
 		service.NewForexRateService,
 		service.NewForexTradeDealService,
 		controller.NewBookRateController,
@@ -83,7 +92,7 @@ func provideComponents() error {
 	for _, provider := range providers {
 		err = c.Provide(provider)
 		if err != nil {
-			slog.Error("application initialization failed: %v", err)
+			slog.Error(fmt.Sprintf("application initialization failed: %v", err))
 			return err
 		}
 	}

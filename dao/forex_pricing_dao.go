@@ -65,6 +65,14 @@ func readCsvFile(filePath string) ([][]string, error) {
 	defer f.Close()
 
 	csvReader := csv.NewReader(f)
+
+	// skip the first line
+	if _, err := csvReader.Read(); err != nil {
+		slog.Error(fmt.Sprintf("Unable to parse file as CSV for %s, %s", filePath, err))
+		return nil, err
+	}
+
+	// read csv records
 	records, err := csvReader.ReadAll()
 	if err != nil {
 		slog.Error(fmt.Sprintf("Unable to parse file as CSV for %s, %s", filePath, err))
