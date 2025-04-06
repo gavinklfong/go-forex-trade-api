@@ -1,6 +1,14 @@
 package service
 
-import "github.com/gavinklfong/go-forex-trade-api/model"
+import (
+	"time"
+
+	"github.com/gavinklfong/go-forex-trade-api/model"
+)
+
+type TimeProvider interface {
+	Now() time.Time
+}
 
 type ForexRateService interface {
 	GetRateByCurrencyPair(baseCurrency, counterCurrency string) (*model.ForexRate, error)
