@@ -1,4 +1,4 @@
-module github.com/gavinklfong/go-rest-api-demo
+module github.com/gavinklfong/go-forex-trade-api
 
 go 1.23.4
 
@@ -6,7 +6,6 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-sql-driver/mysql v1.9.0
 	github.com/google/uuid v1.6.0
-	github.com/google/wire v0.6.0
 	github.com/jaswdr/faker v1.19.1
 	github.com/knadh/koanf/parsers/yaml v0.1.0
 	github.com/knadh/koanf/providers/env v1.0.0
@@ -18,6 +17,7 @@ require (
 	github.com/wiremock/go-wiremock v1.11.0
 	github.com/wiremock/wiremock-testcontainers-go v1.0.0-alpha-9
 	github.com/xyproto/randomstring v1.2.0
+	go.uber.org/dig v1.18.1
 )
 
 require (
@@ -78,6 +78,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.23.12 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect

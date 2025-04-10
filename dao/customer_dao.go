@@ -4,18 +4,18 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/gavinklfong/go-rest-api-demo/model"
+	"github.com/gavinklfong/go-forex-trade-api/model"
 )
 
-type CustomerDao struct {
+type CustomerDaoImpl struct {
 	db *sql.DB
 }
 
-func NewCustomerDao(db *sql.DB) *CustomerDao {
-	return &CustomerDao{db: db}
+func NewCustomerDao(db *sql.DB) CustomerDao {
+	return &CustomerDaoImpl{db: db}
 }
 
-func (dao *CustomerDao) Insert(customer *model.Customer) (int64, error) {
+func (dao *CustomerDaoImpl) Insert(customer *model.Customer) (int64, error) {
 	result, err := dao.db.Exec("INSERT INTO customer(id, name, tier, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
 		customer.ID, customer.Name, customer.Tier, customer.CreatedAt, customer.UpdatedAt)
 	if err != nil {
@@ -32,7 +32,7 @@ func (dao *CustomerDao) Insert(customer *model.Customer) (int64, error) {
 	return count, nil
 }
 
-func (dao *CustomerDao) FindByID(id string) (*model.Customer, error) {
+func (dao *CustomerDaoImpl) FindByID(id string) (*model.Customer, error) {
 	var customer model.Customer
 	err := dao.db.QueryRow("SELECT id, name, tier, created_at, updated_at "+
 		"FROM customer WHERE id=?", id).Scan(&customer.ID, &customer.Name, &customer.Tier, &customer.CreatedAt, &customer.UpdatedAt)
@@ -48,7 +48,7 @@ func (dao *CustomerDao) FindByID(id string) (*model.Customer, error) {
 	}
 }
 
-func (dao *CustomerDao) FindByTier(tier int) (result []*model.Customer, err error) {
+func (dao *CustomerDaoImpl) FindByTier(tier int) (result []*model.Customer, err error) {
 	rows, err := dao.db.Query("SELECT id, name, tier, created_at, updated_at "+
 		"FROM customer WHERE tier=?", tier)
 	defer rows.Close()

@@ -11,5 +11,5 @@ type ForexTradeDeal struct {
 	Rate               float32
 	TradeAction        string
 	BaseCurrencyAmount string
-	CustomerId         string
+	CustomerID         string
 }

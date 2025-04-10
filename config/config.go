@@ -23,7 +23,7 @@ func LoadConfig() error {
 
 	// Load YAML config
 	slog.Info("Load default configuration")
-	if err := k.Load(file.Provider("./application.yaml"), yaml.Parser()); err != nil {
+	if err := k.Load(file.Provider("./config/application.yaml"), yaml.Parser()); err != nil {
 		slog.Error(fmt.Sprintf("error loading config: %v", err))
 		return err
 	}
@@ -33,7 +33,7 @@ func LoadConfig() error {
 	if len(strings.TrimSpace(environment)) > 0 {
 		slog.Info(fmt.Sprintf("Loading env specific configuration - %s", environment))
 		// Load Dot Env config
-		if err := k.Load(file.Provider(fmt.Sprintf("./application-%s.yaml", environment)), yaml.Parser()); err != nil {
+		if err := k.Load(file.Provider(fmt.Sprintf("./config/application-%s.yaml", environment)), yaml.Parser()); err != nil {
 			slog.Error(fmt.Sprintf("error loading config: %v", err))
 			return err
 		}

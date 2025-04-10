@@ -17,7 +17,7 @@ import (
 
 type ForexApiClientTestSuite struct {
 	suite.Suite
-	apiClient         *ForexApiClient
+	apiClient         ForexApiClient
 	wiremockContainer *WireMockContainer
 }
 
@@ -65,13 +65,13 @@ func (suite *ForexApiClientTestSuite) TestGetLatestRates() {
 
 	// Use the WireMock client to stub a new endpoint manually
 
-	body, err := os.ReadFile("rates.json")
+	body, err := os.ReadFile("rates_USD_test.json")
 	if err != nil {
 		suite.T().Fatalf("fail to read stub response from file: %s", err)
 	}
 
 	err = suite.wiremockContainer.Client.StubFor(
-		wiremock.Get(wiremock.URLEqualTo("/rates/latest")).
+		wiremock.Get(wiremock.URLEqualTo("/rates/USD")).
 			WillReturnResponse(
 				wiremock.NewResponse().
 					WithBody(string(body)).
@@ -83,7 +83,7 @@ func (suite *ForexApiClientTestSuite) TestGetLatestRates() {
 		suite.T().Fatal(err)
 	}
 
-	rates, err := suite.apiClient.GetLatestRates()
+	rates, err := suite.apiClient.GetRateByBaseCurrency("USD")
 	if err != nil {
 		suite.T().Fatal(err)
 	}
@@ -95,13 +95,13 @@ func (suite *ForexApiClientTestSuite) TestGetLatestRate() {
 
 	// Use the WireMock client to stub a new endpoint manually
 
-	body, err := os.ReadFile("rate.json")
+	body, err := os.ReadFile("rates_AUD_USD_test.json")
 	if err != nil {
 		suite.T().Fatalf("fail to read stub response from file: %s", err)
 	}
 
 	err = suite.wiremockContainer.Client.StubFor(
-		wiremock.Get(wiremock.URLEqualTo("/rates/latest/AUD/USD")).
+		wiremock.Get(wiremock.URLEqualTo("/rates/AUD-USD")).
 			WillReturnResponse(
 				wiremock.NewResponse().
 					WithBody(string(body)).
@@ -113,7 +113,7 @@ func (suite *ForexApiClientTestSuite) TestGetLatestRate() {
 		suite.T().Fatal(err)
 	}
 
-	rate, err := suite.apiClient.GetLatestRate("AUD", "USD")
+	rate, err := suite.apiClient.GetRateByCurrencyPair("AUD", "USD")
 	if err != nil {
 		suite.T().Fatal(err)
 	}

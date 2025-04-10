@@ -6,18 +6,16 @@ import (
 )
 
 type ForexRateResponse struct {
-	Timestamp       time.Time
-	BaseCurrency    string
-	CounterCurrency string
-	BuyRate         float32
-	SellRate        float32
-	Spread          float32
+	ID    string
+	Date  time.Time
+	Base  string
+	Rates map[string]float32
 }
 
 func (f *ForexRateResponse) UnmarshalJSON(data []byte) error {
 	type Alias ForexRateResponse
 	aux := &struct {
-		Timestamp string
+		Date string
 		*Alias
 	}{
 		Alias: (*Alias)(f),
@@ -29,7 +27,7 @@ func (f *ForexRateResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	f.Timestamp, err = time.Parse("2006-01-02T15:04:05", aux.Timestamp)
+	f.Date, err = time.Parse("2006-01-02", aux.Date)
 	if err != nil {
 		return err
 	}
@@ -40,10 +38,10 @@ func (f *ForexRateResponse) UnmarshalJSON(data []byte) error {
 func (f *ForexRateResponse) MarshalJSON() ([]byte, error) {
 	type Alias ForexRateResponse
 	return json.Marshal(&struct {
-		Timestamp string `json:"timestamp"`
+		Date string `json:"date"`
 		*Alias
 	}{
-		Timestamp: f.Timestamp.Format("2006-01-02T15:04:05"),
-		Alias:     (*Alias)(f),
+		Date:  f.Date.Format("2006-01-02"),
+		Alias: (*Alias)(f),
 	})
 }

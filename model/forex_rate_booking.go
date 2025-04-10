@@ -17,10 +17,12 @@ type ForexRateBookingRequest struct {
 
 type ForexRateBooking struct {
 	ForexRateBookingRequest
+	ID         string
 	Timestamp  time.Time
 	Rate       float32
 	BookingRef string
 	ExpiryTime time.Time
+	CustomerID string
 }
 
 func (f *ForexRateBooking) UnmarshalJSON(data []byte) error {
