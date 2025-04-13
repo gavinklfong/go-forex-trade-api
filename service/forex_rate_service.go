@@ -27,13 +27,9 @@ func NewForexRateService(forexApiClient apiclient.ForexApiClient, forexPricingDa
 }
 
 func (s *ForexRateServiceImpl) GetRateByCurrencyPair(baseCurrency, counterCurrency string) (*model.ForexRate, error) {
-
-	if !isValidCurrency(baseCurrency) {
-		return nil, fmt.Errorf("unsupported base currency %s", baseCurrency)
-	}
-
-	if !isValidCurrency(counterCurrency) {
-		return nil, fmt.Errorf("unsupported counter currency %s", counterCurrency)
+	// Validate currencies
+	if err := s.validateCurrencyPair(baseCurrency, counterCurrency); err != nil {
+		return nil, err
 	}
 
 	forexRate, err := s.forexApiClient.GetRateByCurrencyPair(baseCurrency, counterCurrency)
@@ -51,9 +47,9 @@ func (s *ForexRateServiceImpl) GetRateByCurrencyPair(baseCurrency, counterCurren
 }
 
 func (s *ForexRateServiceImpl) GetRatesByBaseCurrency(baseCurrency string) ([]*model.ForexRate, error) {
-
-	if !isValidCurrency(baseCurrency) {
-		return nil, fmt.Errorf("unsupported base currency %s", baseCurrency)
+	// Validate base currency
+	if err := s.validateCurrency(baseCurrency, "base"); err != nil {
+		return nil, err
 	}
 
 	rateResp, err := s.forexApiClient.GetRateByBaseCurrency(baseCurrency)
@@ -84,6 +80,11 @@ func (s *ForexRateServiceImpl) BookRate(request *model.ForexRateBookingRequest) 
 	if !isValidCurrency(request.CounterCurrency) {
 		return nil, fmt.Errorf("unsupported counter currency %s", request.CounterCurrency)
 	}
+	
+	// Validate trade action early
+	if request.TradeAction != "BUY" && request.TradeAction != "SELL" {
+		return nil, fmt.Errorf("invalid trade action: %s (must be BUY or SELL)", request.TradeAction)
+	}
 
 	// Get current rate from API
 	forexRateResponse, err := s.forexApiClient.GetRateByCurrencyPair(request.BaseCurrency, request.CounterCurrency)
@@ -107,10 +108,8 @@ func (s *ForexRateServiceImpl) BookRate(request *model.ForexRateBookingRequest) 
 	finalRate := rate
 	if request.TradeAction == "BUY" {
 		finalRate = rate + pricing.BuyPip/10000
-	} else if request.TradeAction == "SELL" {
+	} else { // Must be "SELL" as we validated earlier
 		finalRate = rate + pricing.SellPip/10000
-	} else {
-		return nil, fmt.Errorf("invalid trade action: %s", request.TradeAction)
 	}
 
 	now := s.timeProvider.Now().UTC()
