@@ -19,7 +19,7 @@ import (
 
 type ForexRateDaoTestSuite struct {
 	suite.Suite
-	dao            *dao.ForexRateDao
+	dao            dao.ForexRateDao
 	mysqlContainer *mysql.MySQLContainer
 	db             *sql.DB
 }
@@ -126,7 +126,7 @@ func insertBooking(db *sql.DB, booking *model.ForexRateBooking) error {
 		booking.ID, booking.Timestamp, booking.BaseCurrency, booking.CounterCurrency, booking.Rate,
 		booking.TradeAction, booking.BaseCurrencyAmount, booking.BookingRef, booking.ExpiryTime, booking.CustomerID)
 	if err != nil {
-		log.Fatalf("insert booking: %v", err)
+		log.Printf("insert booking: %v", err)
 		return err
 	}
 
