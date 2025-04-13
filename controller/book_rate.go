@@ -23,7 +23,11 @@ func (e *BookRateController) BookRate(c *gin.Context) {
 		return
 	}
 
-	booking := e.r.BookRate(&request)
+	booking, err := e.r.BookRate(&request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, booking)
 }
