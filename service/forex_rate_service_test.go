@@ -10,6 +10,7 @@ import (
 	mockservice "github.com/gavinklfong/go-forex-trade-api/mocks/service"
 	"github.com/gavinklfong/go-forex-trade-api/model"
 	"github.com/stretchr/testify/suite"
+	"github.com/xyproto/randomstring"
 
 	mockdao "github.com/gavinklfong/go-forex-trade-api/mocks/dao"
 )
@@ -19,6 +20,7 @@ type ForexRateServiceTestSuite struct {
 	forexRateService    ForexRateService
 	mockForexApiClient  *mockapiclient.MockForexApiClient
 	mockForexPricingDao *mockdao.MockForexPricingDao
+	mockForexRateDao    *mockdao.MockForexRateDao
 	mockTimeProvider    *mockservice.MockTimeProvider
 }
 
@@ -29,9 +31,11 @@ func TestForexRateServiceTestSuite(t *testing.T) {
 func (s *ForexRateServiceTestSuite) SetupTest() {
 	s.mockForexApiClient = mockapiclient.NewMockForexApiClient(s.T())
 	s.mockForexPricingDao = mockdao.NewMockForexPricingDao(s.T())
+	s.mockForexRateDao = mockdao.NewMockForexRateDao(s.T())
 	s.mockTimeProvider = mockservice.NewMockTimeProvider(s.T())
 
 	s.forexRateService = NewForexRateService(s.mockForexApiClient,
+		s.mockForexRateDao,
 		s.mockForexPricingDao,
 		s.mockTimeProvider)
 }
@@ -230,18 +234,44 @@ func (s *ForexRateServiceTestSuite) TestBookRateWithSellAction() {
 		CustomerId:         123,
 	}
 
+	// Create expected booking
+	booking := &model.ForexRateBooking{
+		ForexRateBookingRequest: model.ForexRateBookingRequest{
+			BaseCurrency:       request.BaseCurrency,
+			CounterCurrency:    request.CounterCurrency,
+			BaseCurrencyAmount: request.BaseCurrencyAmount,
+			TradeAction:        request.TradeAction,
+			CustomerId:         request.CustomerId,
+		},
+		Timestamp:  now,
+		Rate:       rate + sellPip/10000,
+		BookingRef: randomstring.String(8),
+		ExpiryTime: now.Add(time.Minute * 10),
+	}
+
 	// Mock forex API response
 	rates := make(map[string]float32)
 	rates[counterCurrency] = rate
-	mockApiResp := apimodel.ForexRateResponse{baseCurrency + "-" + counterCurrency, now, baseCurrency, rates}
+	mockApiResp := apimodel.ForexRateResponse{
+		ID:    baseCurrency + "-" + counterCurrency,
+		Date:  now,
+		Base:  baseCurrency,
+		Rates: rates}
 	s.mockForexApiClient.EXPECT().GetRateByCurrencyPair(baseCurrency, counterCurrency).Return(&mockApiResp, nil).Once()
 
 	// Mock forex pricing
-	mockForexPricing := model.ForexPricing{baseCurrency, counterCurrency, buyPip, sellPip}
+	mockForexPricing := model.ForexPricing{
+		BaseCurrency:    baseCurrency,
+		CounterCurrency: counterCurrency,
+		BuyPip:          buyPip,
+		SellPip:         sellPip}
 	s.mockForexPricingDao.EXPECT().GetPricingByCurrencyPair(baseCurrency, counterCurrency).Return(&mockForexPricing).Once()
 
+	// Mock forex rate service
+	s.mockForexRateDao.EXPECT().Insert().Return(1, nil)
+
 	// Mock time provider
-	s.mockTimeProvider.EXPECT().Now().Return(now).Once()
+	s.mockTimeProvider.EXPECT().Now().Return(now).Twice()
 
 	// When
 	booking, err := s.forexRateService.BookRate(request)
@@ -253,6 +283,7 @@ func (s *ForexRateServiceTestSuite) TestBookRateWithSellAction() {
 	s.Equal(rate+sellPip/10000, booking.Rate)
 
 	s.mockForexApiClient.AssertExpectations(s.T())
+	s.mockForexRateDao.AssertExpectations(s.T())
 	s.mockForexPricingDao.AssertExpectations(s.T())
 	s.mockTimeProvider.AssertExpectations(s.T())
 }

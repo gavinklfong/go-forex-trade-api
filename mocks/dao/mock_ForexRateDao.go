@@ -171,8 +171,8 @@ type MockForexRateDao_Insert_Call struct {
 
 // Insert is a helper method to define mock.On call
 //   - booking *model.ForexRateBooking
-func (_e *MockForexRateDao_Expecter) Insert(booking interface{}) *MockForexRateDao_Insert_Call {
-	return &MockForexRateDao_Insert_Call{Call: _e.mock.On("Insert", booking)}
+func (_e *MockForexRateDao_Expecter) Insert() *MockForexRateDao_Insert_Call {
+	return &MockForexRateDao_Insert_Call{Call: _e.mock.On("Insert", mock.Anything)}
 }
 
 func (_c *MockForexRateDao_Insert_Call) Run(run func(booking *model.ForexRateBooking)) *MockForexRateDao_Insert_Call {
