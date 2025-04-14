@@ -27,13 +27,9 @@ func NewForexRateService(forexApiClient apiclient.ForexApiClient, forexPricingDa
 }
 
 func (s *ForexRateServiceImpl) GetRateByCurrencyPair(baseCurrency, counterCurrency string) (*model.ForexRate, error) {
-
-	if !isValidCurrency(baseCurrency) {
-		return nil, fmt.Errorf("unsupported base currency %s", baseCurrency)
-	}
-
-	if !isValidCurrency(counterCurrency) {
-		return nil, fmt.Errorf("unsupported counter currency %s", counterCurrency)
+	// Validate currencies
+	if err := s.validateCurrencyPair(baseCurrency, counterCurrency); err != nil {
+		return nil, err
 	}
 
 	forexRate, err := s.forexApiClient.GetRateByCurrencyPair(baseCurrency, counterCurrency)
@@ -51,9 +47,9 @@ func (s *ForexRateServiceImpl) GetRateByCurrencyPair(baseCurrency, counterCurren
 }
 
 func (s *ForexRateServiceImpl) GetRatesByBaseCurrency(baseCurrency string) ([]*model.ForexRate, error) {
-
-	if !isValidCurrency(baseCurrency) {
-		return nil, fmt.Errorf("unsupported base currency %s", baseCurrency)
+	// Validate base currency
+	if err := s.validateCurrency(baseCurrency, "base"); err != nil {
+		return nil, err
 	}
 
 	rateResp, err := s.forexApiClient.GetRateByBaseCurrency(baseCurrency)
@@ -76,7 +72,48 @@ func (s *ForexRateServiceImpl) GetRatesByBaseCurrency(baseCurrency string) ([]*m
 }
 
 func (s *ForexRateServiceImpl) BookRate(request *model.ForexRateBookingRequest) (*model.ForexRateBooking, error) {
+	// Validate currencies
+	if !isValidCurrency(request.BaseCurrency) {
+		return nil, fmt.Errorf("unsupported base currency %s", request.BaseCurrency)
+	}
 
+	if !isValidCurrency(request.CounterCurrency) {
+		return nil, fmt.Errorf("unsupported counter currency %s", request.CounterCurrency)
+	}
+	
+	// Validate trade action early
+	if request.TradeAction != "BUY" && request.TradeAction != "SELL" {
+		return nil, fmt.Errorf("invalid trade action: %s (must be BUY or SELL)", request.TradeAction)
+	}
+
+	// Get current rate from API
+	forexRateResponse, err := s.forexApiClient.GetRateByCurrencyPair(request.BaseCurrency, request.CounterCurrency)
+	if err != nil {
+		slog.Error(fmt.Sprintf("forex api returned error: %v", err))
+		return nil, err
+	}
+
+	rate, exist := forexRateResponse.Rates[request.CounterCurrency]
+	if !exist {
+		return nil, fmt.Errorf("forex rate not found for %s/%s", request.BaseCurrency, request.CounterCurrency)
+	}
+
+	// Get pricing to apply
+	pricing := s.forexPricingDao.GetPricingByCurrencyPair(request.BaseCurrency, request.CounterCurrency)
+	if pricing == nil {
+		return nil, fmt.Errorf("pricing entry does not exist for %s/%s", request.BaseCurrency, request.CounterCurrency)
+	}
+
+	// Calculate the final rate based on trade action
+	finalRate := rate
+	if request.TradeAction == "BUY" {
+		finalRate = rate + pricing.BuyPip/10000
+	} else { // Must be "SELL" as we validated earlier
+		finalRate = rate + pricing.SellPip/10000
+	}
+
+	now := s.timeProvider.Now().UTC()
+	
 	return &model.ForexRateBooking{
 		ForexRateBookingRequest: model.ForexRateBookingRequest{
 			BaseCurrency:       request.BaseCurrency,
@@ -85,10 +122,10 @@ func (s *ForexRateServiceImpl) BookRate(request *model.ForexRateBookingRequest) 
 			TradeAction:        request.TradeAction,
 			CustomerId:         request.CustomerId,
 		},
-		Timestamp:  time.Now(),
-		Rate:       rand.Float32(),
+		Timestamp:  now,
+		Rate:       finalRate,
 		BookingRef: randomstring.String(8),
-		ExpiryTime: time.Now().Add(time.Second * 30),
+		ExpiryTime: now.Add(time.Minute * 10),
 	}, nil
 }
 

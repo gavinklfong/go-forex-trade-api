@@ -19,7 +19,7 @@ import (
 
 type ForexRateDaoTestSuite struct {
 	suite.Suite
-	dao            *dao.ForexRateDao
+	dao            dao.ForexRateDao
 	mysqlContainer *mysql.MySQLContainer
 	db             *sql.DB
 }
@@ -56,50 +56,68 @@ func (suite *ForexRateDaoTestSuite) TearDownSuite() {
 }
 
 func (suite *ForexRateDaoTestSuite) TestInsert() {
+	// Given
 	duration, err := time.ParseDuration("10m")
-	if err != nil {
-		log.Panic("fail to parse duration")
+	suite.Require().NoError(err, "Failed to parse duration")
+	
+	booking := model.ForexRateBooking{
+		ForexRateBookingRequest: model.ForexRateBookingRequest{
+			BaseCurrency:       "GBP",
+			CounterCurrency:    "USD",
+			BaseCurrencyAmount: 1000,
+			TradeAction:        "BUY",
+			CustomerId:         123,
+		},
+		ID:         "1f648720-3bd3-4c8e-8d00-294516f64bf7",
+		Timestamp:  time.Now().UTC(),
+		Rate:       0.25,
+		BookingRef: "ABCD100",
+		ExpiryTime: time.Now().Add(duration).UTC(),
+		CustomerID: "f1440302-01ab-4083-88fd-8864ae83d435",
 	}
-	booking := model.ForexRateBooking{ID: "1f648720-3bd3-4c8e-8d00-294516f64bf7", Timestamp: time.Now(), BaseCurrency: "GBP",
-		CounterCurrency: "USD", Rate: 0.25, TradeAction: "BUY", BaseCurrencyAmount: 1000,
-		BookingRef: "ABCD100", ExpiryTime: time.Now().Add(duration), CustomerID: "f1440302-01ab-4083-88fd-8864ae83d435"}
 
+	// When
 	count, err := suite.dao.Insert(&booking)
-	if err != nil {
-		fmt.Println("fail to insert", err)
-	}
-
-	assert.Equal(suite.T(), int64(1), count)
-
+	
+	// Then
+	suite.Require().NoError(err, "Failed to insert booking")
+	suite.Equal(int64(1), count, "Expected one row to be affected")
 }
 
 func (suite *ForexRateDaoTestSuite) TestFindByID() {
+	// Given
 	bookingID := "1f648720-3bd3-4c8e-8d00-294516f64bf7"
 
 	duration, err := time.ParseDuration("10m")
-	if err != nil {
-		log.Panic("fail to parse duration")
+	suite.Require().NoError(err, "Failed to parse duration")
+	
+	booking := model.ForexRateBooking{
+		ForexRateBookingRequest: model.ForexRateBookingRequest{
+			BaseCurrency:       "GBP",
+			CounterCurrency:    "USD",
+			BaseCurrencyAmount: 1000,
+			TradeAction:        "BUY",
+			CustomerId:         123,
+		},
+		ID:         bookingID,
+		Timestamp:  time.Now().UTC(),
+		Rate:       0.25,
+		BookingRef: "ABCD100",
+		ExpiryTime: time.Now().Add(duration).UTC(),
+		CustomerID: "f1440302-01ab-4083-88fd-8864ae83d435",
 	}
-	booking := model.ForexRateBooking{ID: bookingID, Timestamp: time.Now().In(time.UTC), BaseCurrency: "GBP",
-		CounterCurrency: "USD", Rate: 0.25, TradeAction: "BUY", BaseCurrencyAmount: 1000,
-		BookingRef: "ABCD100", ExpiryTime: time.Now().Add(duration).In(time.UTC), CustomerID: "f1440302-01ab-4083-88fd-8864ae83d435"}
 
+	// Insert booking directly to database
 	err = insertBooking(suite.db, &booking)
-	if err != nil {
-		fmt.Println("fail to insert", err)
-	}
+	suite.Require().NoError(err, "Failed to insert test booking")
 
-	var actual *model.ForexRateBooking
-	actual, err = suite.dao.FindByID(bookingID)
-	if err != nil {
-		suite.T().Error("fail to retrieve record", err)
-	}
-	if actual == nil {
-		suite.T().Error("No record found")
-	}
-
+	// When
+	actual, err := suite.dao.FindByID(bookingID)
+	
+	// Then
+	suite.Require().NoError(err, "Failed to retrieve booking")
+	suite.Require().NotNil(actual, "Expected to find a booking")
 	assertForexRateBookingEqual(suite.T(), actual, &booking)
-
 }
 
 func TestForexRateDaoTestSuite(t *testing.T) {
@@ -126,7 +144,7 @@ func insertBooking(db *sql.DB, booking *model.ForexRateBooking) error {
 		booking.ID, booking.Timestamp, booking.BaseCurrency, booking.CounterCurrency, booking.Rate,
 		booking.TradeAction, booking.BaseCurrencyAmount, booking.BookingRef, booking.ExpiryTime, booking.CustomerID)
 	if err != nil {
-		log.Fatalf("insert booking: %v", err)
+		log.Printf("insert booking: %v", err)
 		return err
 	}
 

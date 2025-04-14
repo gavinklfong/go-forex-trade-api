@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -155,4 +156,226 @@ func (s *ForexRateServiceTestSuite) TestGetRateByBaseCurrencyWithUnknownCurrency
 	forexRates, err := s.forexRateService.GetRatesByBaseCurrency("ZZZ")
 	s.Nil(forexRates)
 	s.NotNil(err)
+}
+
+func (s *ForexRateServiceTestSuite) TestBookRateWithBuyAction() {
+	// Given
+	baseCurrency := "GBP"
+	counterCurrency := "USD"
+	rate := float32(1.29)
+	buyPip := float32(3)
+	sellPip := float32(-6)
+	now := time.Date(2025, 4, 1, 14, 30, 0, 0, time.UTC)
+	expiryTime := now.Add(10 * time.Minute)
+
+	// Create booking request
+	request := &model.ForexRateBookingRequest{
+		BaseCurrency:       baseCurrency,
+		CounterCurrency:    counterCurrency,
+		BaseCurrencyAmount: 1000,
+		TradeAction:        "BUY",
+		CustomerId:         123,
+	}
+
+	// Mock forex API response
+	rates := make(map[string]float32)
+	rates[counterCurrency] = rate
+	mockApiResp := apimodel.ForexRateResponse{baseCurrency + "-" + counterCurrency, now, baseCurrency, rates}
+	s.mockForexApiClient.EXPECT().GetRateByCurrencyPair(baseCurrency, counterCurrency).Return(&mockApiResp, nil).Once()
+
+	// Mock forex pricing
+	mockForexPricing := model.ForexPricing{baseCurrency, counterCurrency, buyPip, sellPip}
+	s.mockForexPricingDao.EXPECT().GetPricingByCurrencyPair(baseCurrency, counterCurrency).Return(&mockForexPricing).Once()
+
+	// Mock time provider
+	s.mockTimeProvider.EXPECT().Now().Return(now).Once()
+
+	// When
+	booking, err := s.forexRateService.BookRate(request)
+
+	// Then
+	s.Nil(err)
+	s.NotNil(booking)
+	s.Equal(baseCurrency, booking.BaseCurrency)
+	s.Equal(counterCurrency, booking.CounterCurrency)
+	s.Equal(float32(1000), booking.BaseCurrencyAmount)
+	s.Equal("BUY", booking.TradeAction)
+	s.Equal(int32(123), booking.CustomerId)
+	s.Equal(now, booking.Timestamp)
+	s.Equal(rate+buyPip/10000, booking.Rate)
+	s.Equal(expiryTime, booking.ExpiryTime)
+	s.NotEmpty(booking.BookingRef)
+	s.Len(booking.BookingRef, 8)
+
+	s.mockForexApiClient.AssertExpectations(s.T())
+	s.mockForexPricingDao.AssertExpectations(s.T())
+	s.mockTimeProvider.AssertExpectations(s.T())
+}
+
+func (s *ForexRateServiceTestSuite) TestBookRateWithSellAction() {
+	// Given
+	baseCurrency := "GBP"
+	counterCurrency := "USD"
+	rate := float32(1.29)
+	buyPip := float32(3)
+	sellPip := float32(-6)
+	now := time.Date(2025, 4, 1, 14, 30, 0, 0, time.UTC)
+
+	// Create booking request
+	request := &model.ForexRateBookingRequest{
+		BaseCurrency:       baseCurrency,
+		CounterCurrency:    counterCurrency,
+		BaseCurrencyAmount: 1000,
+		TradeAction:        "SELL",
+		CustomerId:         123,
+	}
+
+	// Mock forex API response
+	rates := make(map[string]float32)
+	rates[counterCurrency] = rate
+	mockApiResp := apimodel.ForexRateResponse{baseCurrency + "-" + counterCurrency, now, baseCurrency, rates}
+	s.mockForexApiClient.EXPECT().GetRateByCurrencyPair(baseCurrency, counterCurrency).Return(&mockApiResp, nil).Once()
+
+	// Mock forex pricing
+	mockForexPricing := model.ForexPricing{baseCurrency, counterCurrency, buyPip, sellPip}
+	s.mockForexPricingDao.EXPECT().GetPricingByCurrencyPair(baseCurrency, counterCurrency).Return(&mockForexPricing).Once()
+
+	// Mock time provider
+	s.mockTimeProvider.EXPECT().Now().Return(now).Once()
+
+	// When
+	booking, err := s.forexRateService.BookRate(request)
+
+	// Then
+	s.Nil(err)
+	s.NotNil(booking)
+	s.Equal("SELL", booking.TradeAction)
+	s.Equal(rate+sellPip/10000, booking.Rate)
+
+	s.mockForexApiClient.AssertExpectations(s.T())
+	s.mockForexPricingDao.AssertExpectations(s.T())
+	s.mockTimeProvider.AssertExpectations(s.T())
+}
+
+func (s *ForexRateServiceTestSuite) TestBookRateWithInvalidTradeAction() {
+	// Given
+	request := &model.ForexRateBookingRequest{
+		BaseCurrency:       "GBP",
+		CounterCurrency:    "USD",
+		BaseCurrencyAmount: 1000,
+		TradeAction:        "INVALID",
+		CustomerId:         123,
+	}
+
+	// When
+	booking, err := s.forexRateService.BookRate(request)
+
+	// Then
+	s.Nil(booking)
+	s.NotNil(err)
+	s.Contains(err.Error(), "invalid trade action")
+}
+
+func (s *ForexRateServiceTestSuite) TestBookRateWithInvalidBaseCurrency() {
+	// Given
+	request := &model.ForexRateBookingRequest{
+		BaseCurrency:       "XXX",
+		CounterCurrency:    "USD",
+		BaseCurrencyAmount: 1000,
+		TradeAction:        "BUY",
+		CustomerId:         123,
+	}
+
+	// When
+	booking, err := s.forexRateService.BookRate(request)
+
+	// Then
+	s.Nil(booking)
+	s.NotNil(err)
+	s.Contains(err.Error(), "unsupported base currency")
+}
+
+func (s *ForexRateServiceTestSuite) TestBookRateWithInvalidCounterCurrency() {
+	// Given
+	request := &model.ForexRateBookingRequest{
+		BaseCurrency:       "GBP",
+		CounterCurrency:    "XXX",
+		BaseCurrencyAmount: 1000,
+		TradeAction:        "BUY",
+		CustomerId:         123,
+	}
+
+	// When
+	booking, err := s.forexRateService.BookRate(request)
+
+	// Then
+	s.Nil(booking)
+	s.NotNil(err)
+	s.Contains(err.Error(), "unsupported counter currency")
+}
+
+func (s *ForexRateServiceTestSuite) TestBookRateWithMissingPricing() {
+	// Given
+	baseCurrency := "GBP"
+	counterCurrency := "USD"
+	rate := float32(1.29)
+	now := time.Date(2025, 4, 1, 14, 30, 0, 0, time.UTC)
+
+	// Create booking request
+	request := &model.ForexRateBookingRequest{
+		BaseCurrency:       baseCurrency,
+		CounterCurrency:    counterCurrency,
+		BaseCurrencyAmount: 1000,
+		TradeAction:        "BUY",
+		CustomerId:         123,
+	}
+
+	// Mock forex API response
+	rates := make(map[string]float32)
+	rates[counterCurrency] = rate
+	mockApiResp := apimodel.ForexRateResponse{baseCurrency + "-" + counterCurrency, now, baseCurrency, rates}
+	s.mockForexApiClient.EXPECT().GetRateByCurrencyPair(baseCurrency, counterCurrency).Return(&mockApiResp, nil).Once()
+
+	// Mock missing pricing
+	s.mockForexPricingDao.EXPECT().GetPricingByCurrencyPair(baseCurrency, counterCurrency).Return(nil).Once()
+
+	// When
+	booking, err := s.forexRateService.BookRate(request)
+
+	// Then
+	s.Nil(booking)
+	s.NotNil(err)
+	s.Contains(err.Error(), "pricing entry does not exist")
+
+	s.mockForexApiClient.AssertExpectations(s.T())
+	s.mockForexPricingDao.AssertExpectations(s.T())
+}
+
+func (s *ForexRateServiceTestSuite) TestBookRateWithApiError() {
+	// Given
+	baseCurrency := "GBP"
+	counterCurrency := "USD"
+	apiError := fmt.Errorf("API connection error")
+
+	// Create booking request
+	request := &model.ForexRateBookingRequest{
+		BaseCurrency:       baseCurrency,
+		CounterCurrency:    counterCurrency,
+		BaseCurrencyAmount: 1000,
+		TradeAction:        "BUY",
+		CustomerId:         123,
+	}
+
+	// Mock forex API error
+	s.mockForexApiClient.EXPECT().GetRateByCurrencyPair(baseCurrency, counterCurrency).Return(nil, apiError).Once()
+
+	// When
+	booking, err := s.forexRateService.BookRate(request)
+
+	// Then
+	s.Nil(booking)
+	s.NotNil(err)
+	s.Equal(apiError, err)
+
+	s.mockForexApiClient.AssertExpectations(s.T())
 }
