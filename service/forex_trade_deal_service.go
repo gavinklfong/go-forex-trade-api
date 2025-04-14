@@ -3,7 +3,7 @@ package service
 import "github.com/gavinklfong/go-forex-trade-api/dao"
 
 type ForexTradeDealServiceImpl struct {
-	dao              dao.ForexTradeDealDao
+	tradeDealdao     dao.ForexTradeDealDao
 	forexRateService ForexRateService
 }
 

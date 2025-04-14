@@ -2,7 +2,6 @@ package integrationtest
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -59,7 +58,7 @@ func (suite *ForexRateDaoTestSuite) TestInsert() {
 	// Given
 	duration, err := time.ParseDuration("10m")
 	suite.Require().NoError(err, "Failed to parse duration")
-	
+
 	booking := model.ForexRateBooking{
 		ForexRateBookingRequest: model.ForexRateBookingRequest{
 			BaseCurrency:       "GBP",
@@ -78,7 +77,7 @@ func (suite *ForexRateDaoTestSuite) TestInsert() {
 
 	// When
 	count, err := suite.dao.Insert(&booking)
-	
+
 	// Then
 	suite.Require().NoError(err, "Failed to insert booking")
 	suite.Equal(int64(1), count, "Expected one row to be affected")
@@ -90,7 +89,7 @@ func (suite *ForexRateDaoTestSuite) TestFindByID() {
 
 	duration, err := time.ParseDuration("10m")
 	suite.Require().NoError(err, "Failed to parse duration")
-	
+
 	booking := model.ForexRateBooking{
 		ForexRateBookingRequest: model.ForexRateBookingRequest{
 			BaseCurrency:       "GBP",
@@ -113,7 +112,43 @@ func (suite *ForexRateDaoTestSuite) TestFindByID() {
 
 	// When
 	actual, err := suite.dao.FindByID(bookingID)
-	
+
+	// Then
+	suite.Require().NoError(err, "Failed to retrieve booking")
+	suite.Require().NotNil(actual, "Expected to find a booking")
+	assertForexRateBookingEqual(suite.T(), actual, &booking)
+}
+
+func (suite *ForexRateDaoTestSuite) TestFindByBookingRef() {
+	// Given
+	bookingRef := "ABCD100"
+
+	duration, err := time.ParseDuration("10m")
+	suite.Require().NoError(err, "Failed to parse duration")
+
+	booking := model.ForexRateBooking{
+		ForexRateBookingRequest: model.ForexRateBookingRequest{
+			BaseCurrency:       "GBP",
+			CounterCurrency:    "USD",
+			BaseCurrencyAmount: 1000,
+			TradeAction:        "BUY",
+			CustomerId:         123,
+		},
+		ID:         "1f648720-3bd3-4c8e-8d00-294516f64bf7",
+		Timestamp:  time.Now().UTC(),
+		Rate:       0.25,
+		BookingRef: bookingRef,
+		ExpiryTime: time.Now().Add(duration).UTC(),
+		CustomerID: "f1440302-01ab-4083-88fd-8864ae83d435",
+	}
+
+	// Insert booking directly to database
+	err = insertBooking(suite.db, &booking)
+	suite.Require().NoError(err, "Failed to insert test booking")
+
+	// When
+	actual, err := suite.dao.FindByBookingRef(bookingRef)
+
 	// Then
 	suite.Require().NoError(err, "Failed to retrieve booking")
 	suite.Require().NotNil(actual, "Expected to find a booking")

@@ -21,7 +21,7 @@ func (_m *MockForexRateService) EXPECT() *MockForexRateService_Expecter {
 }
 
 // BookRate provides a mock function with given fields: request
-func (_m *MockForexRateService) BookRate(request *model.ForexRateBookingRequest) *model.ForexRateBooking {
+func (_m *MockForexRateService) BookRate(request *model.ForexRateBookingRequest) (*model.ForexRateBooking, error) {
 	ret := _m.Called(request)
 
 	if len(ret) == 0 {
@@ -29,6 +29,10 @@ func (_m *MockForexRateService) BookRate(request *model.ForexRateBookingRequest)
 	}
 
 	var r0 *model.ForexRateBooking
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.ForexRateBookingRequest) (*model.ForexRateBooking, error)); ok {
+		return rf(request)
+	}
 	if rf, ok := ret.Get(0).(func(*model.ForexRateBookingRequest) *model.ForexRateBooking); ok {
 		r0 = rf(request)
 	} else {
@@ -37,7 +41,13 @@ func (_m *MockForexRateService) BookRate(request *model.ForexRateBookingRequest)
 		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(*model.ForexRateBookingRequest) error); ok {
+		r1 = rf(request)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // MockForexRateService_BookRate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'BookRate'
@@ -58,12 +68,12 @@ func (_c *MockForexRateService_BookRate_Call) Run(run func(request *model.ForexR
 	return _c
 }
 
-func (_c *MockForexRateService_BookRate_Call) Return(_a0 *model.ForexRateBooking) *MockForexRateService_BookRate_Call {
-	_c.Call.Return(_a0)
+func (_c *MockForexRateService_BookRate_Call) Return(_a0 *model.ForexRateBooking, _a1 error) *MockForexRateService_BookRate_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockForexRateService_BookRate_Call) RunAndReturn(run func(*model.ForexRateBookingRequest) *model.ForexRateBooking) *MockForexRateService_BookRate_Call {
+func (_c *MockForexRateService_BookRate_Call) RunAndReturn(run func(*model.ForexRateBookingRequest) (*model.ForexRateBooking, error)) *MockForexRateService_BookRate_Call {
 	_c.Call.Return(run)
 	return _c
 }

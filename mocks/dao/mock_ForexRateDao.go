@@ -20,6 +20,64 @@ func (_m *MockForexRateDao) EXPECT() *MockForexRateDao_Expecter {
 	return &MockForexRateDao_Expecter{mock: &_m.Mock}
 }
 
+// FindByBookingRef provides a mock function with given fields: bookingRef
+func (_m *MockForexRateDao) FindByBookingRef(bookingRef string) (*model.ForexRateBooking, error) {
+	ret := _m.Called(bookingRef)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindByBookingRef")
+	}
+
+	var r0 *model.ForexRateBooking
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*model.ForexRateBooking, error)); ok {
+		return rf(bookingRef)
+	}
+	if rf, ok := ret.Get(0).(func(string) *model.ForexRateBooking); ok {
+		r0 = rf(bookingRef)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.ForexRateBooking)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(bookingRef)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockForexRateDao_FindByBookingRef_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindByBookingRef'
+type MockForexRateDao_FindByBookingRef_Call struct {
+	*mock.Call
+}
+
+// FindByBookingRef is a helper method to define mock.On call
+//   - bookingRef string
+func (_e *MockForexRateDao_Expecter) FindByBookingRef(bookingRef interface{}) *MockForexRateDao_FindByBookingRef_Call {
+	return &MockForexRateDao_FindByBookingRef_Call{Call: _e.mock.On("FindByBookingRef", bookingRef)}
+}
+
+func (_c *MockForexRateDao_FindByBookingRef_Call) Run(run func(bookingRef string)) *MockForexRateDao_FindByBookingRef_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *MockForexRateDao_FindByBookingRef_Call) Return(_a0 *model.ForexRateBooking, _a1 error) *MockForexRateDao_FindByBookingRef_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockForexRateDao_FindByBookingRef_Call) RunAndReturn(run func(string) (*model.ForexRateBooking, error)) *MockForexRateDao_FindByBookingRef_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // FindByID provides a mock function with given fields: id
 func (_m *MockForexRateDao) FindByID(id string) (*model.ForexRateBooking, error) {
 	ret := _m.Called(id)

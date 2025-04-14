@@ -53,3 +53,22 @@ func (dao *ForexRateDaoImpl) FindByID(id string) (*model.ForexRateBooking, error
 		return &booking, nil
 	}
 }
+
+func (dao *ForexRateDaoImpl) FindByBookingRef(bookingRef string) (*model.ForexRateBooking, error) {
+	var booking model.ForexRateBooking
+	err := dao.db.QueryRow("SELECT id, timestamp, base_currency, counter_currency, rate, "+
+		"trade_action, base_currency_amount, booking_ref, expiry_time, customer_id "+
+		"FROM forex_rate_booking "+
+		"WHERE booking_ref=?", bookingRef).Scan(&booking.ID, &booking.Timestamp, &booking.BaseCurrency, &booking.CounterCurrency, &booking.Rate,
+		&booking.TradeAction, &booking.BaseCurrencyAmount, &booking.BookingRef, &booking.ExpiryTime, &booking.CustomerID)
+	switch {
+	case err == sql.ErrNoRows:
+		log.Printf("no booking record with id %v\n", bookingRef)
+		return nil, nil
+	case err != nil:
+		log.Fatalf("query error: %v\n", err)
+		return nil, err
+	default:
+		return &booking, nil
+	}
+}

@@ -11,6 +11,7 @@ type CustomerDao interface {
 type ForexRateDao interface {
 	Insert(booking *model.ForexRateBooking) (int64, error)
 	FindByID(id string) (*model.ForexRateBooking, error)
+	FindByBookingRef(bookingRef string) (*model.ForexRateBooking, error)
 }
 
 type ForexTradeDealDao interface {
