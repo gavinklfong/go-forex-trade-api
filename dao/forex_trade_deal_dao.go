@@ -19,7 +19,7 @@ func NewForexTradeDealDao(db *sql.DB) ForexTradeDealDao {
 func (dao *ForexTradeDealDaoImpl) Insert(deal *model.ForexTradeDeal) (int64, error) {
 	result, err := dao.db.Exec(`
 	INSERT INTO forex_trade_deal(id, ref, timestamp, base_currency, counter_currency, rate, 
-	trade_action, base_currency_amount, customer_id) VALUES "
+	trade_action, base_currency_amount, customer_id) VALUES 
 	(?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		deal.ID, deal.Ref, deal.Timestamp, deal.BaseCurrency, deal.CounterCurrency, deal.Rate,
 		deal.TradeAction, deal.BaseCurrencyAmount, deal.CustomerID)

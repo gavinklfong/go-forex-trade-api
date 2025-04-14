@@ -17,4 +17,6 @@ type ForexRateService interface {
 }
 
 type ForexTradeDealService interface {
+	SubmitTradeDeal(baseCurrency, counterCurrency string,
+		baseCurrencyAmount, rate float32, rateBookingRef string) (*model.ForexTradeDeal, error)
 }
