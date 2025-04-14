@@ -2,6 +2,7 @@ package dao
 
 import (
 	"database/sql"
+	"fmt"
 	"log/slog"
 
 	"github.com/gavinklfong/go-forex-trade-api/model"
@@ -23,13 +24,13 @@ func (dao *ForexTradeDealDaoImpl) Insert(deal *model.ForexTradeDeal) (int64, err
 		deal.ID, deal.Ref, deal.Timestamp, deal.BaseCurrency, deal.CounterCurrency, deal.Rate,
 		deal.TradeAction, deal.BaseCurrencyAmount, deal.CustomerID)
 	if err != nil {
-		slog.Error("insert deal: %v", err)
+		slog.Error(fmt.Sprintf("insert deal: %v", err))
 		return 0, err
 	}
 
 	count, err := result.RowsAffected()
 	if err != nil {
-		slog.Error("rows affected error: %v", err)
+		slog.Error(fmt.Sprintf("rows affected error: %v", err))
 		return 0, err
 	}
 
@@ -45,10 +46,10 @@ func (dao *ForexTradeDealDaoImpl) FindByID(id string) (*model.ForexTradeDeal, er
 		&deal.BaseCurrencyAmount, &deal.CustomerID)
 	switch {
 	case err == sql.ErrNoRows:
-		slog.Info("no deal record with id %v", id)
+		slog.Info(fmt.Sprintf("no deal record with id %v", id))
 		return nil, nil
 	case err != nil:
-		slog.Error("query error: %v\n", err)
+		slog.Error(fmt.Sprintf("query error: %v\n", err))
 		return nil, err
 	default:
 		return &deal, nil
