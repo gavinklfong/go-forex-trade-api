@@ -23,7 +23,7 @@ import (
 
 type CustomerDaoTestSuite struct {
 	suite.Suite
-	dao            *dao.CustomerDao
+	dao            dao.CustomerDao
 	mysqlContainer *mysql.MySQLContainer
 	db             *sql.DB
 }
