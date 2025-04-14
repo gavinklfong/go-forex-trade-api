@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"log/slog"
-	"math/rand/v2"
 	"strings"
 	"time"
 
@@ -83,7 +82,7 @@ func (s *ForexRateServiceImpl) BookRate(request *model.ForexRateBookingRequest) 
 	if err := s.validateCurrencyPair(request.BaseCurrency, request.CounterCurrency); err != nil {
 		return nil, err
 	}
-	
+
 	// Validate trade action early
 	if err := s.validateTradeAction(request.TradeAction); err != nil {
 		return nil, err
@@ -116,7 +115,7 @@ func (s *ForexRateServiceImpl) BookRate(request *model.ForexRateBookingRequest) 
 	}
 
 	now := s.timeProvider.Now().UTC()
-	
+
 	return &model.ForexRateBooking{
 		ForexRateBookingRequest: model.ForexRateBookingRequest{
 			BaseCurrency:       request.BaseCurrency,
@@ -160,11 +159,11 @@ func (s *ForexRateServiceImpl) validateCurrencyPair(baseCurrency, counterCurrenc
 	if err := s.validateCurrency(baseCurrency, "base"); err != nil {
 		return err
 	}
-	
+
 	if err := s.validateCurrency(counterCurrency, "counter"); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
