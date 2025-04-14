@@ -71,19 +71,22 @@ func (s *ForexRateServiceImpl) GetRatesByBaseCurrency(baseCurrency string) ([]*m
 	return forexRates, nil
 }
 
+func (s *ForexRateServiceImpl) validateTradeAction(action string) error {
+	if action != "BUY" && action != "SELL" {
+		return fmt.Errorf("invalid trade action: %s (must be BUY or SELL)", action)
+	}
+	return nil
+}
+
 func (s *ForexRateServiceImpl) BookRate(request *model.ForexRateBookingRequest) (*model.ForexRateBooking, error) {
 	// Validate currencies
-	if !isValidCurrency(request.BaseCurrency) {
-		return nil, fmt.Errorf("unsupported base currency %s", request.BaseCurrency)
-	}
-
-	if !isValidCurrency(request.CounterCurrency) {
-		return nil, fmt.Errorf("unsupported counter currency %s", request.CounterCurrency)
+	if err := s.validateCurrencyPair(request.BaseCurrency, request.CounterCurrency); err != nil {
+		return nil, err
 	}
 	
 	// Validate trade action early
-	if request.TradeAction != "BUY" && request.TradeAction != "SELL" {
-		return nil, fmt.Errorf("invalid trade action: %s (must be BUY or SELL)", request.TradeAction)
+	if err := s.validateTradeAction(request.TradeAction); err != nil {
+		return nil, err
 	}
 
 	// Get current rate from API
@@ -144,6 +147,25 @@ func (s *ForexRateServiceImpl) buildForexRate(baseCurrency, counterCurrency stri
 		SellRate:        rate + pricing.SellPip/10000,
 		Spread:          pricing.GetSpread(),
 	}, nil
+}
+
+func (s *ForexRateServiceImpl) validateCurrency(currency string, currencyType string) error {
+	if !isValidCurrency(currency) {
+		return fmt.Errorf("unsupported %s currency %s", currencyType, currency)
+	}
+	return nil
+}
+
+func (s *ForexRateServiceImpl) validateCurrencyPair(baseCurrency, counterCurrency string) error {
+	if err := s.validateCurrency(baseCurrency, "base"); err != nil {
+		return err
+	}
+	
+	if err := s.validateCurrency(counterCurrency, "counter"); err != nil {
+		return err
+	}
+	
+	return nil
 }
 
 func isValidCurrency(currency string) bool {
