@@ -22,10 +22,20 @@ func NewForexApiClient(url string) ForexApiClient {
 }
 
 func newClient() (*http.Client, error) {
+	retryWaitMin, err := time.ParseDuration("500ms")
+	if err != nil {
+		return nil, err
+	}
+
+	retryWaitMax, err := time.ParseDuration("5s")
+	if err != nil {
+		return nil, err
+	}
+
 	retryClient := retryablehttp.NewClient()
 	retryClient.RetryMax = 3
-	retryClient.RetryWaitMin = 5
-	retryClient.RetryWaitMax = 5
+	retryClient.RetryWaitMin = retryWaitMin
+	retryClient.RetryWaitMax = retryWaitMax
 	retryClient.CheckRetry = retryPolicy
 	retryClient.Backoff = backOffPolicy
 
