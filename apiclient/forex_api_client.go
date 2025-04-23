@@ -23,20 +23,20 @@ func (c *ForexApiClientImpl) GetRateByCurrencyPair(base, counter string) (*model
 	slog.Info(fmt.Sprintf("GET %s", requestURL))
 	res, err := http.Get(requestURL)
 	if err != nil {
-		slog.Error("error making http request: %s\n", err)
+		slog.Error(fmt.Sprintf("error making http request: %s\n", err))
 		return nil, err
 	}
 
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		slog.Error("error reading response body: %s\n", err)
+		slog.Error(fmt.Sprintf("error reading response body: %s\n", err))
 		return nil, err
 	}
 
 	var rate model.ForexRateResponse
 	err = json.Unmarshal(resBody, &rate)
 	if err != nil {
-		slog.Error("error parsing response body: %s", err)
+		slog.Error(fmt.Sprintf("error parsing response body: %s", err))
 		return nil, err
 	}
 
@@ -48,20 +48,20 @@ func (c *ForexApiClientImpl) GetRateByBaseCurrency(base string) (*model.ForexRat
 	slog.Info(fmt.Sprintf("GET %s", requestURL))
 	res, err := http.Get(requestURL)
 	if err != nil {
-		slog.Error("error making http request: %s\n", err)
+		slog.Error(fmt.Sprintf("error making http request: %s\n", err))
 		return nil, err
 	}
 
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		slog.Error("error reading response body: %s\n", err)
+		slog.Error(fmt.Sprintf("error reading response body: %s\n", err))
 		return nil, err
 	}
 
 	var rate model.ForexRateResponse
 	err = json.Unmarshal(resBody, &rate)
 	if err != nil {
-		slog.Error("error parsing response body: %s", err)
+		slog.Error(fmt.Sprintf("error parsing response body: %s", err))
 		return nil, err
 	}
 
