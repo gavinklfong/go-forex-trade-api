@@ -1,13 +1,16 @@
 package apiclient
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/gavinklfong/go-forex-trade-api/apiclient/model"
+	retryablehttp "github.com/hashicorp/go-retryablehttp"
 )
 
 type ForexApiClientImpl struct {
@@ -18,10 +21,53 @@ func NewForexApiClient(url string) ForexApiClient {
 	return &ForexApiClientImpl{url: url}
 }
 
+func newClient() (*http.Client, error) {
+	retryClient := retryablehttp.NewClient()
+	retryClient.RetryMax = 3
+	retryClient.RetryWaitMin = 5
+	retryClient.RetryWaitMax = 5
+	retryClient.CheckRetry = retryPolicy
+	retryClient.Backoff = backOffPolicy
+
+	return retryClient.StandardClient(), nil
+}
+
+func retryPolicy(ctx context.Context, resp *http.Response, err error) (bool, error) {
+	shouldRetry, err := retryablehttp.DefaultRetryPolicy(ctx, resp, err)
+	if err != nil {
+		return false, err
+	}
+
+	if shouldRetry {
+		return shouldRetry, nil
+	}
+
+	if resp.StatusCode == http.StatusBadRequest {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func backOffPolicy(min, max time.Duration, attemptNum int, resp *http.Response) time.Duration {
+	if min != max {
+		return retryablehttp.DefaultBackoff(min, max, attemptNum, resp)
+	} else {
+		return min
+	}
+
+}
+
 func (c *ForexApiClientImpl) GetRateByCurrencyPair(base, counter string) (*model.ForexRateResponse, error) {
 	requestURL := fmt.Sprintf("%s/rates/%s-%s", c.url, base, counter)
 	slog.Info(fmt.Sprintf("GET %s", requestURL))
-	res, err := http.Get(requestURL)
+
+	httpClient, err := newClient()
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := httpClient.Get(requestURL)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error making http request: %s\n", err))
 		return nil, err

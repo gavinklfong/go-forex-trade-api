@@ -35,6 +35,7 @@ func (suite *ForexApiClientTestSuite) TearDownSuite() {
 func (suite *ForexApiClientTestSuite) TearDownTest() {
 	// reset wiremock stub
 	suite.wiremockContainer.Client.Reset()
+	suite.wiremockContainer.Client.ResetAllScenarios()
 }
 
 func (suite *ForexApiClientTestSuite) SetupSuite() {
@@ -108,6 +109,52 @@ func (suite *ForexApiClientTestSuite) TestGetLatestRate() {
 					WithHeader("Content-Type", "application/json").
 					WithStatus(http.StatusOK),
 			),
+	)
+	if err != nil {
+		suite.T().Fatal(err)
+	}
+
+	rate, err := suite.apiClient.GetRateByCurrencyPair("AUD", "USD")
+	if err != nil {
+		suite.T().Fatal(err)
+	}
+
+	assert.NotNil(suite.T(), rate)
+}
+
+func (suite *ForexApiClientTestSuite) TestGetLatestRate_with1stAttemptFailed() {
+
+	// 1st attempt return 502
+	err := suite.wiremockContainer.Client.StubFor(
+		wiremock.Get(wiremock.URLEqualTo("/rates/AUD-USD")).
+			WillReturnResponse(
+				wiremock.NewResponse().
+					WithStatus(http.StatusBadGateway),
+			).
+			InScenario("retry").
+			WhenScenarioStateIs(wiremock.ScenarioStateStarted).
+			WillSetStateTo("next"),
+	)
+	if err != nil {
+		suite.T().Fatal(err)
+	}
+
+	// 2nd attempt return 200
+	body, err := os.ReadFile("rates_AUD_USD_test.json")
+	if err != nil {
+		suite.T().Fatalf("fail to read stub response from file: %s", err)
+	}
+
+	err = suite.wiremockContainer.Client.StubFor(
+		wiremock.Get(wiremock.URLEqualTo("/rates/AUD-USD")).
+			WillReturnResponse(
+				wiremock.NewResponse().
+					WithBody(string(body)).
+					WithHeader("Content-Type", "application/json").
+					WithStatus(http.StatusBadGateway),
+			).
+			InScenario("retry").
+			WhenScenarioStateIs("next"),
 	)
 	if err != nil {
 		suite.T().Fatal(err)
