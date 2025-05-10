@@ -26,6 +26,8 @@ func NewRouter(getRateController *controller.GetRateController,
 
 func (r *Router) doSetup() {
 
+	r.e.Use(PrometheusMiddleware())
+
 	r.e.GET("/rates/:baseCurrency/:counterCurrency", r.getRateController.GetRateByCurrencyPair)
 	r.e.GET("/rates/:baseCurrency", r.getRateController.GetRateByBaseCurrency)
 	r.e.GET("/rates/latest", r.getRateController.GetDefaultRates)
