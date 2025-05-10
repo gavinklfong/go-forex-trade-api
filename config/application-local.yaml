@@ -1,5 +1,5 @@
 app:
-  forex-rate-api-url: http://localhost:9090
+  forex-rate-api-url: http://localhost:3000
 
 db:
   url: jdbc:mysql://localhost:3306/forex

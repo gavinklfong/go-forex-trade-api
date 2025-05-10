@@ -1,6 +1,7 @@
 package router
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -44,11 +45,12 @@ func PrometheusMiddleware() gin.HandlerFunc {
 		// Collect metrics after the request is processed
 		duration := time.Since(startTime).Seconds()
 		statusCode := c.Writer.Status()
+
 		method := c.Request.Method
 		path := c.FullPath() // Use FullPath to capture the route pattern (e.g., "/users/:id")
 
 		// Update metrics
-		httpRequestsTotal.WithLabelValues(method, path, string(statusCode)).Inc()
-		httpRequestDuration.WithLabelValues(method, path, string(statusCode)).Observe(duration)
+		httpRequestsTotal.WithLabelValues(method, path, strconv.Itoa(statusCode)).Inc()
+		httpRequestDuration.WithLabelValues(method, path, strconv.Itoa(statusCode)).Observe(duration)
 	}
 }
