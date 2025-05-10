@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gavinklfong/go-forex-trade-api/controller"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Router struct {
@@ -33,6 +34,8 @@ func (r *Router) doSetup() {
 
 	r.e.GET("/deals", r.tradeDealController.GetTradeDeal)
 	r.e.POST("/deals", r.tradeDealController.SubmitTradeDeal)
+
+	r.e.GET("/metrics", gin.WrapH(promhttp.Handler()))
 }
 
 func (r *Router) Run(s string) {
