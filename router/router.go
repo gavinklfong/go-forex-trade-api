@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gavinklfong/go-forex-trade-api/controller"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Router struct {
@@ -25,6 +26,8 @@ func NewRouter(getRateController *controller.GetRateController,
 
 func (r *Router) doSetup() {
 
+	r.e.Use(PrometheusMiddleware())
+
 	r.e.GET("/rates/:baseCurrency/:counterCurrency", r.getRateController.GetRateByCurrencyPair)
 	r.e.GET("/rates/:baseCurrency", r.getRateController.GetRateByBaseCurrency)
 	r.e.GET("/rates/latest", r.getRateController.GetDefaultRates)
@@ -33,6 +36,8 @@ func (r *Router) doSetup() {
 
 	r.e.GET("/deals", r.tradeDealController.GetTradeDeal)
 	r.e.POST("/deals", r.tradeDealController.SubmitTradeDeal)
+
+	r.e.GET("/metrics", gin.WrapH(promhttp.Handler()))
 }
 
 func (r *Router) Run(s string) {
